@@ -1,0 +1,16 @@
+﻿{
+	"applications": [{
+		"app_key": "jeppevinkel.discord2openvrpipe",
+		"launch_type": "binary",
+		"binary_path_windows": "Discord2OpenVRPipe.exe",
+		"is_dashboard_overlay": true,
+		"action_manifest_path": "./actions.json",
+
+		"strings": {
+			"en_us": {
+				"name": "Discord 2 OpenVR Pipe",
+				"description": "Transmits content from a Discord server to an in-game overlay."
+			}
+		}
+	}]
+}
