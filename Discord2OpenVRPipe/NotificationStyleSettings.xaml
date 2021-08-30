@@ -18,71 +18,71 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <CheckBox x:Name="CheckBoxFixedToHeadset" Content="Fixed to headset" Margin="0 0 5 0" />
-                    <CheckBox x:Name="CheckBoxAlignHorizontal" Content="Horizontal alignment" />
+                    <CheckBox x:Name="CheckBoxAlignHorizontal" Content="Horizontal alignment" Margin="0 0 5 0" />
+                    <CheckBox x:Name="CheckBoxLevel" Content="Level" ToolTip="Will ignore pitch of the headset and keep origin level" />
                 </StackPanel>
                 <DockPanel Margin="5">
                     <Label Content="Channel:" Margin="0 0 5 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="64" Value="0" />
+                    <controls:IntegerUpDown x:Name="PropertiesChannel" Minimum="0" Maximum="64" Value="0" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Hz:" Margin="0 0 34 0"/>
-                    <controls:IntegerUpDown Minimum="-1" Maximum="240" Value="-1" />
+                    <controls:IntegerUpDown x:Name="PropertiesHz" Minimum="-1" Maximum="240" Value="-1" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Duration:" Margin="0 0 2 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="99999" Value="1000" />
+                    <controls:IntegerUpDown x:Name="PropertiesDuration" Minimum="0" Maximum="99999" Value="1000" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Width:" Margin="0 0 16 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="99999" Value="1" />
+                    <controls:NumberUpDown x:Name="PropertiesWidth" Minimum="0.001" Maximum="99999" Value="1" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Distance:" Margin="0 0 3 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="99999" Value="1" />
+                    <controls:NumberUpDown x:Name="PropertiesDistance" Minimum="0.001" Maximum="99999" Value="1" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Pitch:" Margin="0 0 22 0"/>
-                    <controls:IntegerUpDown Minimum="-360" Maximum="360" Value="0" />
+                    <controls:NumberUpDown x:Name="PropertiesPitch" Minimum="-360" Maximum="360" Value="0" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Yaw:" Margin="0 0 28 0"/>
-                    <controls:IntegerUpDown Minimum="-360" Maximum="360" Value="0" />
+                    <controls:NumberUpDown x:Name="PropertiesYaw" Minimum="-360" Maximum="360" Value="0" />
                 </DockPanel>
             </StackPanel>
         </GroupBox>
         <UniformGrid Columns="2">
         <GroupBox Header="Transition In" Background="AliceBlue">
             <StackPanel Orientation="Vertical">
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Normalized scale, 1 = 100%">
                     <Label Content="Scale:" Margin="0 0 28 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="1" />
+                    <controls:NumberUpDown x:Name="TransitionInScale" Minimum="0.001" Maximum="1000" Value="1" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Normalized opacity where 1 = 100%">
                     <Label Content="Opacity:" Margin="0 0 14 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInOpacity" Minimum="0" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Vertical translation, in meters">
                     <Label Content="Vertical:" Margin="0 0 16 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInVertical" Minimum="-1000" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Horizontal translation, in meters">
                     <Label Content="Horizontal:" Margin="0 0 0 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInHorizontal" Minimum="-1000" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Distance from headset, in meters">
                     <Label Content="Distance:" Margin="0 0 10 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInDistance" Minimum="0" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Roll rotation, left(-) or right (+) in degrees">
                     <Label Content="Spin:" Margin="0 0 32 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInSpin" Minimum="-360" Maximum="360" Value="0" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Tween:" Margin="0 0 21 0"/>
                     <ComboBox x:Name="TweenInSelect"
                               SelectedValuePath="TweenValue"
-                              SelectionChanged="TweenInSelect_OnSelectionChanged"
-                              SelectedIndex="0">
+                              SelectionChanged="TweenInSelect_OnSelectionChanged">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" Width="Auto">
@@ -94,44 +94,43 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Length of animation, in milliseconds">
                     <Label Content="Duration:" Margin="0 0 9 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="100" />
+                    <controls:IntegerUpDown x:Name="TransitionInDuration" Minimum="0" Maximum="1000" Value="100" />
                 </DockPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="Transition Out" Background="LightGoldenrodYellow">
             <StackPanel Orientation="Vertical">
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Normalized scale, 1 = 100%">
                     <Label Content="Scale:" Margin="0 0 28 0"/>
-                    <controls:NumberUpDown Increment="0.1" Minimum="0.0" Maximum="1000.0" Value="1.0" />
+                    <controls:NumberUpDown x:Name="TransitionOutScale" Minimum="0.001" Maximum="1000" Value="1" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Normalized opacity where 1 = 100%">
                     <Label Content="Opacity:" Margin="0 0 14 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutOpacity" Minimum="0" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Vertical translation, in meters">
                     <Label Content="Vertical:" Margin="0 0 16 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutVertical" Minimum="-1000" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Horizontal translation, in meters">
                     <Label Content="Horizontal:" Margin="0 0 0 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutHorizontal" Minimum="-1000" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Distance from headset, in meters">
                     <Label Content="Distance:" Margin="0 0 10 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutDistance" Minimum="0" Maximum="1000" Value="0" />
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Roll rotation, left(-) or right (+) in degrees">
                     <Label Content="Spin:" Margin="0 0 32 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutSpin" Minimum="-360" Maximum="360" Value="0" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Tween:" Margin="0 0 21 0"/>
                     <ComboBox x:Name="TweenOutSelect"
                               SelectedValuePath="TweenValue"
-                              SelectionChanged="TweenOutSelect_OnSelectionChanged"
-                              SelectedIndex="0">
+                              SelectionChanged="TweenOutSelect_OnSelectionChanged">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" Width="Auto">
@@ -143,12 +142,16 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </DockPanel>
-                <DockPanel Margin="5">
+                <DockPanel Margin="5" ToolTip="Length of animation, in milliseconds">
                     <Label Content="Duration:" Margin="0 0 9 0"/>
-                    <controls:IntegerUpDown Minimum="0" Maximum="1000" Value="100" />
+                    <controls:IntegerUpDown x:Name="TransitionOutDuration" Minimum="0" Maximum="1000" Value="100" />
                 </DockPanel>
             </StackPanel>
         </GroupBox>
         </UniformGrid>
+        <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Right">
+            <Button Name="buttonOk" IsDefault="True" Click="OkButtonClick" Margin="5" Padding="10 4 10 4">Save</Button>
+            <Button Name="buttonCancel" IsCancel="True" Margin="5" Padding="10 4 10 4">Cancel</Button>
+        </StackPanel>
     </StackPanel>
 </Window>

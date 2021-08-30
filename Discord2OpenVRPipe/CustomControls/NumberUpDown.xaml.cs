@@ -8,21 +8,51 @@ using System.Windows.Input;
 
 namespace Discord2OpenVRPipe.CustomControls
 {
+    
+    [TemplatePart(Name = "PART_NumericTextBox", Type = typeof(TextBox))]
+    [TemplatePart(Name = "PART_IncreaseButton", Type = typeof(RepeatButton))]
+    [TemplatePart(Name = "PART_DecreaseButton", Type = typeof(RepeatButton))]
     public partial class NumberUpDown : UserControl
     {
+        private string valueFormat;
+        private double initialValue;
+        
+        
+        public static readonly DependencyProperty SilentErrorProperty =
+            DependencyProperty.Register("SilentErrorSeparator", typeof(bool), typeof(NumberUpDown), new PropertyMetadata(false));
+        public bool SilentError
+        {
+            get { return (bool)this.GetValue(SilentErrorProperty); }
+            set 
+            { 
+                this.SetValue(SilentErrorProperty, value); 
+            }
+        }
+        
+        public static readonly DependencyProperty AllowManualEditProperty =
+            DependencyProperty.Register("AllowManualEditSeparator", typeof(bool), typeof(NumberUpDown), new PropertyMetadata(true));
+        public bool AllowManualEdit
+        {
+            get { return (bool)this.GetValue(AllowManualEditProperty); }
+            set 
+            { 
+                this.SetValue(AllowManualEditProperty, value); 
+            }
+        }
+        
         public static readonly DependencyProperty MinimumProperty =
-            DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumberUpDown), new PropertyMetadata(0.0));
+            DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumberUpDown), new PropertyMetadata(double.MinValue));
         public double Minimum
         {
-            get { return (double)this.GetValue(MinimumProperty); }
+            get { return Math.Max(double.MinValue, (double)this.GetValue(MinimumProperty)); }
             set { this.SetValue(MinimumProperty, value); }
         }
         
         public static readonly DependencyProperty MaximumProperty =
-            DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(NumberUpDown), new PropertyMetadata(100.0));
+            DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(NumberUpDown), new PropertyMetadata(double.MaxValue));
         public double Maximum
         {
-            get { return (double)this.GetValue(MaximumProperty); }
+            get { return Math.Min(double.MaxValue, (double)this.GetValue(MaximumProperty)); }
             set { this.SetValue(MaximumProperty, value); }
         }
         
@@ -30,21 +60,21 @@ namespace Discord2OpenVRPipe.CustomControls
             DependencyProperty.Register(nameof(Increment), typeof(double), typeof(NumberUpDown), new PropertyMetadata(1.0));
         public double Increment
         {
-            get { return (double)GetValue(IncrementProperty); }
-            set { SetValue(IncrementProperty, value); }
+            get { return Math.Min(double.MaxValue, Math.Abs((double)this.GetValue(IncrementProperty))); }
+            set { this.SetValue(IncrementProperty, value); }
         }
         
         public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumberUpDown), new PropertyMetadata(0.0));
+            DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumberUpDown), new PropertyMetadata(0.0, OnValueChanged));
+        private static void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            NumberUpDown numericBoxControl = (NumberUpDown)sender;
+            numericBoxControl.OnValueChanged((double)args.OldValue, (double)args.NewValue);
+        }
         public double Value
         {
             get { return (double)this.GetValue(ValueProperty); }
-            set
-            {
-                SetValue(ValueProperty, value);
-                Debug.WriteLine(value);
-                PART_NumericTextBox.Text = value.ToString(ValueFormat);
-            }
+            set { this.SetValue(ValueProperty, value); }
         }
 
         public static readonly DependencyProperty ValueFormatProperty =
@@ -91,50 +121,44 @@ namespace Discord2OpenVRPipe.CustomControls
             int caretIndex = textbox.CaretIndex;
             try
             {
-                double newvalue;
-                // see if the text will parse to a float
-                bool error = !double.TryParse(e.Text, out newvalue);
-                string text = textbox.Text;
-                if (!error)
+                bool isError = false;
+                string text = this.PART_NumericTextBox.Text.Insert(caretIndex, e.Text);
+                double value;
+                isError = (!double.TryParse(text, out value));
+                isError |= (value < this.Minimum || value > this.Maximum);
+                if (isError)
                 {
-                    // we have a valid float, so insert the new text at the 
-                    //caret's position 
-                    text = text.Insert(textbox.CaretIndex, e.Text);
-                    // check the string again to make sure it still parses
-                    error = !double.TryParse(text, out newvalue);
-                    if (!error)
+                    if (!this.SilentError)
                     {
-                        // we're good, so make sure the value is in the 
-                        // specified min/max range
-                        error = (newvalue < this.Minimum || newvalue > this.Maximum);
+                        SystemSounds.Hand.Play();
                     }
-                }
-                if (error)
-                {
-                    // play the error sound
-                    SystemSounds.Hand.Play();
-                    // reset the caret index to where it was when we entered 
-                    // this method
-                    textbox.CaretIndex = caretIndex;
-                }
-                else
-                {
-                    // set the textbox text (this will set the caret index to 0)
-                    this.PART_NumericTextBox.Text = text;
-                    // put the caret at the END of the inserted text
-                    textbox.CaretIndex = caretIndex+e.Text.Length;
-                    // set the Value to the new value 
-                    this.Value = newvalue;
+                    e.Handled = true;
                 }
             }
             catch (FormatException)
             {
             }
-            e.Handled = true;
+        }
+        
+        private void PART_NumericTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string text = this.PART_NumericTextBox.Text;
+            // if the text is empty, use the initial Value
+            if (string.IsNullOrEmpty(text))
+            {
+                text = this.initialValue.ToString(this.valueFormat);
+                this.PART_NumericTextBox.Text = text;
+            }
+            // personal discovery - int.Parse won't parse negative numbers unless you use the 
+            // numberstyles indicated here. There are a bunch of interesting number styles 
+            // available, and you can even parse the numeric values in a mixed-character string. 
+            // Interesting stuff.
+            this.Value = (text == "-") ? 0 : double.Parse(text);
         }
 
         private void numericBox_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            Debug.WriteLine(e.Delta);
             if (e.Delta > 0)
             {
                 IncreaseValue();
@@ -147,43 +171,36 @@ namespace Discord2OpenVRPipe.CustomControls
         
         private void IncreaseValue()
         {
-            Debug.WriteLine($"i[{Increment}] max[{Maximum}] val[{Value}] {Math.Min(this.Maximum, this.Value + this.Increment)}");
-            Value = Math.Min(this.Maximum, this.Value + this.Increment);
+            this.Value = Math.Min(this.Maximum, this.Value + this.Increment);
+            this.PART_NumericTextBox.Text = this.Value.ToString(this.valueFormat);
         }
         
         private void DecreaseValue()
         {
-            Debug.WriteLine($"i[{Increment}] min[{Minimum}] val[{Value}] {Math.Max(this.Minimum, this.Value - this.Increment)}");
-            Value = Math.Max(this.Minimum, this.Value - this.Increment);
+            this.Value = Math.Max(this.Minimum, this.Value - this.Increment);
+            this.PART_NumericTextBox.Text = this.Value.ToString(this.valueFormat);
         }
         
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
 
-            RepeatButton btn = GetTemplateChild("PART_IncreaseButton") as RepeatButton;
-            if (btn != null)
+            this.PART_IncreaseButton.Click += increaseBtn_Click;
+            this.PART_DecreaseButton.Click += decreaseBtn_Click;
+
+            if (this.AllowManualEdit)
             {
-                btn.Click += increaseBtn_Click;
+                this.PART_NumericTextBox.PreviewTextInput += numericBox_PreviewTextInput;
+                this.PART_NumericTextBox.TextChanged += this.PART_NumericTextBox_TextChanged;
             }
 
-            btn = GetTemplateChild("PART_DecreaseButton") as RepeatButton;
-            if (btn != null)
-            {
-                btn.Click += decreaseBtn_Click;
-            }
+            this.PART_NumericTextBox.IsReadOnly = !this.AllowManualEdit;
+            this.PART_NumericTextBox.MouseWheel += numericBox_MouseWheel;
 
-            TextBox tb = GetTemplateChild("PART_NumericTextBox") as TextBox;
-            if (tb != null)
-            {
-                PART_NumericTextBox = tb;
-                PART_NumericTextBox.Text = Value.ToString(ValueFormat);
-                PART_NumericTextBox.PreviewTextInput += numericBox_PreviewTextInput;
-                PART_NumericTextBox.MouseWheel += numericBox_MouseWheel;
-            }
 
-            btn = null;
-            tb = null;
+            this.valueFormat = "0.000"; 
+            this.initialValue = this.Value;
+            this.PART_NumericTextBox.Text = this.Value.ToString(this.valueFormat);
         }
     }
 }

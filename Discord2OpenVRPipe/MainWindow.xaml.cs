@@ -184,7 +184,7 @@ namespace Discord2OpenVRPipe
 
         private void ButtonStyleEditClick(object sender, RoutedEventArgs e)
         {
-            var notif = new NotificationStyleSettings();
+            var notif = new NotificationStyleSettings(_settings.NotificationStyle);
             notif.ShowDialog();
             var res = notif.DialogResult;
         }

@@ -12,6 +12,8 @@ namespace Discord2OpenVRPipe
         private NotificationTween _selectedTweenIn = NotificationTween.Linear;
         private NotificationTween _selectedTweenOut = NotificationTween.Linear;
 
+        private NotificationStyleConfig _newConf;
+
         public NotificationTween SelectedTweenIn
         {
             get
@@ -78,18 +80,98 @@ namespace Discord2OpenVRPipe
             }
         }
 
-        public NotificationStyleSettings()
+        public NotificationStyleSettings(NotificationStyleConfig curConf)
         {
             InitializeComponent();
             TweenList = ((NotificationTween[])Enum.GetValues(typeof(NotificationTween))).Select(t => new ComboTween(t, NotificationExtensions.NotificationTweenTooltip(t))).ToList();
+
+            _newConf = curConf.Clone();
+
+            // Initialize values
+            
+            CheckBoxFixedToHeadset.IsChecked = _newConf.Properties.Headset;
+            CheckBoxFixedToHeadset.Checked += (sender, args) => _newConf.Properties.Headset = true;
+            CheckBoxFixedToHeadset.Unchecked += (sender, args) => _newConf.Properties.Headset = false;
+            CheckBoxAlignHorizontal.IsChecked = _newConf.Properties.Horizontal;
+            CheckBoxAlignHorizontal.Checked += (sender, args) => _newConf.Properties.Horizontal = true;
+            CheckBoxAlignHorizontal.Unchecked += (sender, args) => _newConf.Properties.Horizontal = false;
+            CheckBoxLevel.IsChecked = _newConf.Properties.Level;
+            CheckBoxLevel.Checked += (sender, args) => _newConf.Properties.Level = true;
+            CheckBoxLevel.Unchecked += (sender, args) => _newConf.Properties.Level = false;
+
+            PropertiesChannel.Value = _newConf.Properties.Channel;
+            PropertiesChannel.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Channel = args.NewValue;
+            };
+            PropertiesDistance.Value = _newConf.Properties.Distance;
+            PropertiesDistance.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Distance = args.NewValue;
+            };
+            PropertiesDuration.Value = _newConf.Properties.Duration;
+            PropertiesDuration.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Duration = args.NewValue;
+            };
+            PropertiesHz.Value = _newConf.Properties.Hz;
+            PropertiesHz.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Hz = args.NewValue;
+            };
+            PropertiesPitch.Value = _newConf.Properties.Pitch;
+            PropertiesPitch.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Pitch = args.NewValue;
+            };
+            PropertiesWidth.Value = _newConf.Properties.Width;
+            PropertiesWidth.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Width = args.NewValue;
+            };
+            PropertiesYaw.Value = _newConf.Properties.Yaw;
+            PropertiesYaw.ValueChanged += (sender, args) =>
+            {
+                _newConf.Properties.Yaw = args.NewValue;
+            };
+
+            TransitionInDistance.Value = _newConf.TransitionIn.Distance;
+            TransitionInDistance.ValueChanged += (sender, args) => _newConf.TransitionIn.Distance = args.NewValue;
+            TransitionInDuration.Value = _newConf.TransitionIn.Duration;
+            TransitionInDuration.ValueChanged += (sender, args) => _newConf.TransitionIn.Duration = args.NewValue;
+            TransitionInHorizontal.Value = _newConf.TransitionIn.Horizontal;
+            TransitionInHorizontal.ValueChanged += (sender, args) => _newConf.TransitionIn.Horizontal = args.NewValue;
+            TransitionInOpacity.Value = _newConf.TransitionIn.Opacity;
+            TransitionInOpacity.ValueChanged += (sender, args) => _newConf.TransitionIn.Opacity = args.NewValue;
+            TransitionInScale.Value = _newConf.TransitionIn.Scale;
+            TransitionInScale.ValueChanged += (sender, args) => _newConf.TransitionIn.Scale = args.NewValue;
+            TransitionInSpin.Value = _newConf.TransitionIn.Spin;
+            TransitionInSpin.ValueChanged += (sender, args) => _newConf.TransitionIn.Spin = args.NewValue;
+            TransitionInVertical.Value = _newConf.TransitionIn.Vertical;
+            TransitionInVertical.ValueChanged += (sender, args) => _newConf.TransitionIn.Vertical = args.NewValue;
+
+            TransitionOutDistance.Value = _newConf.TransitionOut.Distance;
+            TransitionOutDistance.ValueChanged += (sender, args) => _newConf.TransitionOut.Distance = args.NewValue;
+            TransitionOutDuration.Value = _newConf.TransitionOut.Duration;
+            TransitionOutDuration.ValueChanged += (sender, args) => _newConf.TransitionOut.Duration = args.NewValue;
+            TransitionOutHorizontal.Value = _newConf.TransitionOut.Horizontal;
+            TransitionOutHorizontal.ValueChanged += (sender, args) => _newConf.TransitionOut.Horizontal = args.NewValue;
+            TransitionOutOpacity.Value = _newConf.TransitionOut.Opacity;
+            TransitionOutOpacity.ValueChanged += (sender, args) => _newConf.TransitionOut.Opacity = args.NewValue;
+            TransitionOutScale.Value = _newConf.TransitionOut.Scale;
+            TransitionOutScale.ValueChanged += (sender, args) => _newConf.TransitionOut.Scale = args.NewValue;
+            TransitionOutSpin.Value = _newConf.TransitionOut.Spin;
+            TransitionOutSpin.ValueChanged += (sender, args) => _newConf.TransitionOut.Spin = args.NewValue;
+            TransitionOutVertical.Value = _newConf.TransitionOut.Vertical;
+            TransitionOutVertical.ValueChanged += (sender, args) => _newConf.TransitionOut.Vertical = args.NewValue;
             
             TweenInSelect.ItemsSource = TweenList;
-            TweenInSelect.SelectedValue = SelectedTweenIn;
-            TweenInSelect.SelectedIndex = SelectedTweenInIndex;
+            TweenInSelect.SelectedValue = _newConf.TransitionIn.Tween;
+            TweenInSelect.SelectedIndex = (int)_newConf.TransitionIn.Tween;
             
             TweenOutSelect.ItemsSource = TweenList;
-            TweenOutSelect.SelectedValue = SelectedTweenOut;
-            TweenOutSelect.SelectedIndex = SelectedTweenOutIndex;
+            TweenOutSelect.SelectedValue = _newConf.TransitionOut.Tween;
+            TweenOutSelect.SelectedIndex = (int)_newConf.TransitionOut.Tween;
         }
 
         private void TweenInSelect_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -98,6 +180,8 @@ namespace Discord2OpenVRPipe
 
             SelectedTweenIn = (NotificationTween)box.SelectedValue;
             SelectedTweenInIndex = box.SelectedIndex;
+
+            _newConf.TransitionIn.Tween = SelectedTweenIn;
         }
 
         private void TweenOutSelect_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -106,6 +190,14 @@ namespace Discord2OpenVRPipe
 
             SelectedTweenOut = (NotificationTween)box.SelectedValue;
             SelectedTweenOutIndex = box.SelectedIndex;
+
+            _newConf.TransitionOut.Tween = SelectedTweenOut;
+        }
+
+        private void OkButtonClick(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.NotificationStyle = _newConf;
+            DialogResult = true;
         }
     }
     

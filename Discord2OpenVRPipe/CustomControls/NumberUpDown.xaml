@@ -14,8 +14,7 @@
 
         <Grid Grid.Column="0">
             <TextBox x:Name="PART_NumericTextBox" Grid.Column="0" BorderBrush="Black" Margin="0,0,0.2,0"
-                     PreviewTextInput="numericBox_PreviewTextInput"
-                     MouseWheel="numericBox_MouseWheel" VerticalContentAlignment="Center" />
+                     VerticalContentAlignment="Center" />
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
@@ -25,8 +24,7 @@
             <RepeatButton x:Name="PART_IncreaseButton" Grid.Row="0" Margin="0,0,0,0.1"
                           BorderBrush="Black" BorderThickness="0.75" Width="13"
                           Foreground="Black" Background="#cecece"
-                          Style="{DynamicResource UpDownButtonStyle}"
-                          Click="increaseBtn_Click">
+                          Style="{DynamicResource UpDownButtonStyle}">
                 <RepeatButton.Content>
                     <Polygon StrokeThickness="0.5" Stroke="Transparent"
                              Points="0,0 -2,5 2,5" Stretch="Fill"
@@ -37,8 +35,7 @@
             <RepeatButton x:Name="PART_DecreaseButton" Grid.Row="1" Margin="0,0.1,0,0" Width="13"
                           BorderBrush="Black" BorderThickness="0.75"
                           Foreground="Black" Background="#cecece"
-                          Style="{DynamicResource UpDownButtonStyle}"
-                          Click="decreaseBtn_Click">
+                          Style="{DynamicResource UpDownButtonStyle}">
                 <RepeatButton.Content>
                     <Polygon StrokeThickness="0.5" Stroke="Transparent"
                              Points="-2,0 2,0 0,5 " Stretch="Fill"

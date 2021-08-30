@@ -46,6 +46,48 @@ namespace Discord2OpenVRPipe
                 Duration = 100
             };
         }
+
+        public NotificationStyleConfig Clone()
+        {
+            return new NotificationStyleConfig
+            {
+                Properties = new NotificationStyleConfigProperties
+                {
+                    Channel = this.Properties.Channel,
+                    Distance = this.Properties.Distance,
+                    Duration = this.Properties.Duration,
+                    Headset = this.Properties.Headset,
+                    Horizontal = this.Properties.Horizontal,
+                    Hz = this.Properties.Hz,
+                    Level = this.Properties.Level,
+                    Pitch = this.Properties.Pitch,
+                    Width = this.Properties.Width,
+                    Yaw = this.Properties.Yaw
+                },
+                TransitionIn = new NotificationStyleConfigTransition
+                {
+                    Distance = this.TransitionIn.Distance,
+                    Duration = this.TransitionIn.Duration,
+                    Horizontal = this.TransitionIn.Horizontal,
+                    Opacity = this.TransitionIn.Opacity,
+                    Scale = this.TransitionIn.Scale,
+                    Spin = this.TransitionIn.Spin,
+                    Tween = this.TransitionIn.Tween,
+                    Vertical = this.TransitionIn.Vertical
+                },
+                TransitionOut = new NotificationStyleConfigTransition
+                {
+                    Distance = this.TransitionOut.Distance,
+                    Duration = this.TransitionOut.Duration,
+                    Horizontal = this.TransitionOut.Horizontal,
+                    Opacity = this.TransitionOut.Opacity,
+                    Scale = this.TransitionOut.Scale,
+                    Spin = this.TransitionOut.Spin,
+                    Tween = this.TransitionOut.Tween,
+                    Vertical = this.TransitionOut.Vertical
+                }
+            };
+        }
     }
 
     [Serializable]
@@ -53,24 +95,25 @@ namespace Discord2OpenVRPipe
     {
         public bool Headset { get; set; }
         public bool Horizontal { get; set; }
+        public bool Level { get; set; }
         public int Channel { get; set; }
         public int Hz { get; set; }
         public int Duration { get; set; }
-        public float Width { get; set; }
-        public float Distance { get; set; }
-        public float Pitch { get; set; }
-        public float Yaw { get; set; }
+        public double Width { get; set; }
+        public double Distance { get; set; }
+        public double Pitch { get; set; }
+        public double Yaw { get; set; }
     }
 
     [Serializable]
     public class NotificationStyleConfigTransition
     {
-        public float Scale { get; set; }
-        public float Opacity { get; set; }
-        public float Vertical { get; set; }
-        public float Horizontal { get; set; }
-        public float Distance { get; set; }
-        public float Spin { get; set; }
+        public double Scale { get; set; }
+        public double Opacity { get; set; }
+        public double Vertical { get; set; }
+        public double Horizontal { get; set; }
+        public double Distance { get; set; }
+        public double Spin { get; set; }
         public NotificationTween Tween { get; set; }
         public int Duration { get; set; }
     }
