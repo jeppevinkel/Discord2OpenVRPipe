@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Configuration;
+using System.Windows.Media;
 
 namespace Discord2OpenVRPipe.Properties
 {
@@ -65,19 +66,7 @@ namespace Discord2OpenVRPipe.Properties
                 this[nameof(LaunchMinimized)] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ExitWithSteam {
-            get {
-                return ((bool)(this[nameof(ExitWithSteam)]));
-            }
-            set {
-                this[nameof(ExitWithSteam)] = value;
-            }
-        }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -87,6 +76,30 @@ namespace Discord2OpenVRPipe.Properties
             }
             set {
                 this[nameof(MinimizeToTray)] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool WatermarkImages {
+            get {
+                return ((bool)(this[nameof(WatermarkImages)]));
+            }
+            set {
+                this[nameof(WatermarkImages)] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FF000000")]
+        public Color WatermarkColor {
+            get {
+                return ((Color)(this[nameof(WatermarkColor)]));
+            }
+            set {
+                this[nameof(WatermarkColor)] = value;
             }
         }
         
@@ -99,6 +112,30 @@ namespace Discord2OpenVRPipe.Properties
             }
             set {
                 this[nameof(NotificationStyle)] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5.0")]
+        public double CooldownMinutes {
+            get {
+                return ((double)(this[nameof(CooldownMinutes)]));
+            }
+            set {
+                this[nameof(CooldownMinutes)] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CooldownEnabled {
+            get {
+                return ((bool)(this[nameof(CooldownEnabled)]));
+            }
+            set {
+                this[nameof(CooldownEnabled)] = value;
             }
         }
     }

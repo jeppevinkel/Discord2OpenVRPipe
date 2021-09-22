@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Discord2OpenVRPipe
 {
@@ -93,28 +94,46 @@ namespace Discord2OpenVRPipe
     [Serializable]
     public class NotificationStyleConfigProperties
     {
+        [JsonProperty(PropertyName = "headset")]
         public bool Headset { get; set; }
+        [JsonProperty(PropertyName = "horizontal")]
         public bool Horizontal { get; set; }
+        [JsonProperty(PropertyName = "level")]
         public bool Level { get; set; }
+        [JsonProperty(PropertyName = "channel")]
         public int Channel { get; set; }
+        [JsonProperty(PropertyName = "hz")]
         public int Hz { get; set; }
+        [JsonProperty(PropertyName = "duration")]
         public int Duration { get; set; }
+        [JsonProperty(PropertyName = "width")]
         public double Width { get; set; }
+        [JsonProperty(PropertyName = "distance")]
         public double Distance { get; set; }
+        [JsonProperty(PropertyName = "pitch")]
         public double Pitch { get; set; }
+        [JsonProperty(PropertyName = "yaw")]
         public double Yaw { get; set; }
     }
 
     [Serializable]
     public class NotificationStyleConfigTransition
     {
+        [JsonProperty(PropertyName = "scale")]
         public double Scale { get; set; }
+        [JsonProperty(PropertyName = "opacity")]
         public double Opacity { get; set; }
+        [JsonProperty(PropertyName = "vertical")]
         public double Vertical { get; set; }
+        [JsonProperty(PropertyName = "horizontal")]
         public double Horizontal { get; set; }
+        [JsonProperty(PropertyName = "distance")]
         public double Distance { get; set; }
+        [JsonProperty(PropertyName = "spin")]
         public double Spin { get; set; }
+        [JsonProperty(PropertyName = "tween")]
         public NotificationTween Tween { get; set; }
+        [JsonProperty(PropertyName = "duration")]
         public int Duration { get; set; }
     }
     
@@ -152,5 +171,30 @@ namespace Discord2OpenVRPipe
                 _ => throw new ArgumentOutOfRangeException(nameof(tween), tween, null)
             };
         }
+
+        public static PipeNotification GetNotification(this NotificationStyleConfig style, string imageData)
+        {
+            return new PipeNotification
+            {
+                Image = imageData,
+                Properties = style.Properties,
+                Transition = style.TransitionIn,
+                Transition2 = style.TransitionOut
+            };
+        }
+    }
+
+    public class PipeNotification
+    {
+        [JsonProperty(PropertyName = "custom")]
+        public bool Custom = true;
+        [JsonProperty(PropertyName = "image")]
+        public string Image;
+        [JsonProperty(PropertyName = "properties")]
+        public NotificationStyleConfigProperties Properties;
+        [JsonProperty(PropertyName = "transition")]
+        public NotificationStyleConfigTransition Transition;
+        [JsonProperty(PropertyName = "transition2")]
+        public NotificationStyleConfigTransition Transition2;
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using Color = System.Windows.Media.Color;
 
 namespace Discord2OpenVRPipe
 {
@@ -11,6 +14,10 @@ namespace Discord2OpenVRPipe
     {
         private NotificationTween _selectedTweenIn = NotificationTween.Linear;
         private NotificationTween _selectedTweenOut = NotificationTween.Linear;
+        private AppController _appController;
+
+        private Color watermarkColor = Colors.Black;
+        private SolidColorBrush watermarkColorBrush;
 
         private NotificationStyleConfig _newConf;
 
@@ -80,11 +87,12 @@ namespace Discord2OpenVRPipe
             }
         }
 
-        public NotificationStyleSettings(NotificationStyleConfig curConf)
+        public NotificationStyleSettings(NotificationStyleConfig curConf, AppController appController)
         {
             InitializeComponent();
             TweenList = ((NotificationTween[])Enum.GetValues(typeof(NotificationTween))).Select(t => new ComboTween(t, NotificationExtensions.NotificationTweenTooltip(t))).ToList();
-
+            _appController = appController;
+            
             _newConf = curConf.Clone();
 
             // Initialize values
@@ -172,6 +180,34 @@ namespace Discord2OpenVRPipe
             TweenOutSelect.ItemsSource = TweenList;
             TweenOutSelect.SelectedValue = _newConf.TransitionOut.Tween;
             TweenOutSelect.SelectedIndex = (int)_newConf.TransitionOut.Tween;
+
+            watermarkColor = Properties.Settings.Default.WatermarkColor;
+            watermarkEnabledCheckBox.IsChecked = Properties.Settings.Default.WatermarkImages;
+
+            watermarkColorBrush = new SolidColorBrush(watermarkColor);
+            watermarkColorRec.Fill = watermarkColorBrush;
+
+            redSelect.Value = watermarkColor.R;
+            greenSelect.Value = watermarkColor.G;
+            blueSelect.Value = watermarkColor.B;
+
+            redSelect.ValueChanged += (sender, args) =>
+            {
+                watermarkColor.R = (byte)args.NewValue;
+                watermarkColorBrush.Color = watermarkColor;
+            };
+
+            greenSelect.ValueChanged += (sender, args) =>
+            {
+                watermarkColor.G = (byte) args.NewValue;
+                watermarkColorBrush.Color = watermarkColor;
+            };
+
+            blueSelect.ValueChanged += (sender, args) =>
+            {
+                watermarkColor.B = (byte) args.NewValue;
+                watermarkColorBrush.Color = watermarkColor;
+            };
         }
 
         private void TweenInSelect_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -197,7 +233,14 @@ namespace Discord2OpenVRPipe
         private void OkButtonClick(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.NotificationStyle = _newConf;
+            Properties.Settings.Default.WatermarkColor = watermarkColor;
+            Properties.Settings.Default.WatermarkImages = watermarkEnabledCheckBox.IsChecked ?? false;
             DialogResult = true;
+        }
+
+        private void TestButtonClick(object sender, RoutedEventArgs e)
+        {
+            _appController.TestPipe(_newConf);
         }
     }
     

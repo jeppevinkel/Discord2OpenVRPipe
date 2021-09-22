@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
+using System.Windows.Forms;
+using Discord2OpenVRPipe.Properties;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace Discord2OpenVRPipe
 {
@@ -14,6 +17,18 @@ namespace Discord2OpenVRPipe
     {
         private AppController _controller;
         private Properties.Settings _settings = Properties.Settings.Default;
+        private System.Windows.Forms.NotifyIcon _notifyIcon = null;
+        private WindowState _storedWindowState = WindowState.Normal;
+
+        public double CooldownMinutes
+        {
+            get => Properties.Settings.Default.CooldownMinutes;
+            set
+            {
+                Properties.Settings.Default.CooldownMinutes = value;
+                Properties.Settings.Default.Save();
+            }
+        }
 
         public MainWindow()
         {
@@ -22,6 +37,15 @@ namespace Discord2OpenVRPipe
             Title = Properties.Resources.AppName;
 
             LoadSettings();
+            
+            _notifyIcon = new System.Windows.Forms.NotifyIcon();
+            _notifyIcon.BalloonTipText = "The app has been minimised. Click the tray icon to show.";
+            _notifyIcon.BalloonTipTitle = Properties.Resources.AppName;
+            _notifyIcon.Text = Properties.Resources.AppName;
+            _notifyIcon.Icon = new Icon(@"icon.ico");
+            _notifyIcon.Visible = true;
+            _notifyIcon.Click += new EventHandler(NotifyIconClick);
+            _notifyIcon.BalloonTipClicked += new EventHandler(NotifyIconClick);
             
             Label_Version.Content = Properties.Resources.Version;
 
@@ -32,12 +56,12 @@ namespace Discord2OpenVRPipe
                     if (status)
                     {
                         Label_OpenVRStatus.Background = Brushes.OliveDrab;
-                        Label_OpenVRStatus.Content = "Connected";
+                        Label_OpenVRStatus.Text = "Connected";
                     }
                     else
                     {
                         Label_OpenVRStatus.Background = Brushes.Tomato;
-                        Label_OpenVRStatus.Content = "Disconnected";
+                        Label_OpenVRStatus.Text = "Disconnected";
                         
                     }
                 });
@@ -90,13 +114,108 @@ namespace Discord2OpenVRPipe
                         });
                         Dispatcher.Invoke(act, args: channel);
                     }
+                }, status =>
+                {
+                    if (Dispatcher.CheckAccess())
+                    {
+                        if (status)
+                        {
+                            Label_PipeStatus.Background = Brushes.OliveDrab;
+                            Label_PipeStatus.Text = "Connected";
+                        }
+                        else
+                        {
+                            Label_PipeStatus.Background = Brushes.Tomato;
+                            Label_PipeStatus.Text = "Disconnected";
+
+                        }
+                    }
+                    else
+                    {
+                        var act = new Action<bool>(_status =>
+                        {
+                            if (_status)
+                            {
+                                Label_PipeStatus.Background = Brushes.OliveDrab;
+                                Label_PipeStatus.Text = "Connected";
+                            }
+                            else
+                            {
+                                Label_PipeStatus.Background = Brushes.Tomato;
+                                Label_PipeStatus.Text = "Disconnected";
+
+                            }
+                        });
+                        Dispatcher.Invoke(act, args: status);
+                    }
                 });
+
+            Cooldown.IsEnabled = Settings.Default.CooldownEnabled;
+            Cooldown.Value = Settings.Default.CooldownMinutes;
+            CooldownEnabled.IsChecked = Settings.Default.CooldownEnabled;
+            Cooldown.ValueChanged += (sender, args) =>
+            {
+                Settings.Default.CooldownMinutes = args.NewValue;
+            };
+            
             if (_settings.LaunchMinimized)
             {
-                Hide();
+                if (_settings.MinimizeToTray)
+                {
+                    // _notifyIcon.ShowBalloonTip(5000, "Tip", "I am minimized to the system tray!", ToolTipIcon.Info);
+                    Hide();
+                    _notifyIcon.ShowBalloonTip(2000);
+                }
                 WindowState = WindowState.Minimized;
-                ShowInTaskbar = !_settings.MinimizeToTray;
             }
+        }
+        
+        void OnStateChanged(object sender, EventArgs args)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                if (_settings.MinimizeToTray)
+                {
+                    Hide();
+                }
+                if (_notifyIcon != null)
+                {
+                    _notifyIcon.ShowBalloonTip(2000);
+                    // ShowInTaskbar = false;
+                }
+            }
+            else
+            {
+                _storedWindowState = WindowState;
+                // ShowInTaskbar = true;
+            }
+        }
+
+        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs args)
+        {
+            CheckTrayIcon();
+        }
+        
+        private void CheckTrayIcon()
+        {
+            ShowTrayIcon(!IsVisible);
+        }
+        
+        private void ShowTrayIcon(bool show)
+        {
+            if (_notifyIcon != null)
+                _notifyIcon.Visible = show;
+        }
+        
+        private void NotifyIconClick(object sender, EventArgs e)
+        {
+            Show();
+            WindowState = _storedWindowState;
+        }
+
+        public void SetMinimizeToTray(bool state)
+        {
+            ShowInTaskbar = !state;
         }
         
         private void LoadSettings()
@@ -108,7 +227,6 @@ namespace Discord2OpenVRPipe
             
             checkBox_MinimizeOnLaunch.IsChecked = _settings.LaunchMinimized;
             checkBox_MinimizeToTray.IsChecked = _settings.MinimizeToTray;
-            checkBox_ExitWithSteamVR.IsChecked = _settings.ExitWithSteam;
             textBoxPort.Text = _settings.PipePort.ToString();
             textBoxToken.Text = _settings.BotToken;
         }
@@ -159,15 +277,9 @@ namespace Discord2OpenVRPipe
             _settings.Save();
         }
 
-        private void CheckBox_ExitWithSteamVR_Checked(object sender, RoutedEventArgs e)
-        {
-            _settings.ExitWithSteam = CheckboxValue(e);
-            _settings.Save();
-        }
-
         private void ButtonBotReconnectClick(object sender, RoutedEventArgs e)
         {
-            
+            _controller.ReconnectDiscord();
         }
 
         private void ButtonChannelEditClick(object sender, RoutedEventArgs e)
@@ -184,9 +296,22 @@ namespace Discord2OpenVRPipe
 
         private void ButtonStyleEditClick(object sender, RoutedEventArgs e)
         {
-            var notif = new NotificationStyleSettings(_settings.NotificationStyle);
+            var notif = new NotificationStyleSettings(_settings.NotificationStyle, _controller);
             notif.ShowDialog();
             var res = notif.DialogResult;
+        }
+
+        private void ButtonStyleTestClick(object sender, RoutedEventArgs e)
+        {
+            _controller.TestPipe();
+        }
+
+        private void CheckBox_CooldownEnabled(object sender, RoutedEventArgs e)
+        {
+            bool enabled = CheckboxValue(e);
+            Properties.Settings.Default.CooldownEnabled = enabled;
+            Properties.Settings.Default.Save();
+            Cooldown.IsEnabled = enabled;
         }
     }
 }
