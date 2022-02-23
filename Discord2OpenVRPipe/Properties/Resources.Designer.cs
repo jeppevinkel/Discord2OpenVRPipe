@@ -70,7 +70,7 @@ namespace Discord2OpenVRPipe.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to v0.1.
+        ///   Looks up a localized string similar to v1.0.
         /// </summary>
         internal static string Version {
             get {

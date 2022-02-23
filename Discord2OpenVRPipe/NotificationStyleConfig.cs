@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Discord2OpenVRPipe
@@ -7,45 +8,10 @@ namespace Discord2OpenVRPipe
     public class NotificationStyleConfig
     {
         public NotificationStyleConfigProperties Properties { get; set; }
-        public NotificationStyleConfigTransition TransitionIn { get; set; }
-        public NotificationStyleConfigTransition TransitionOut { get; set; }
 
         public NotificationStyleConfig()
         {
-            Properties = new NotificationStyleConfigProperties
-            {
-                Headset = false,
-                Horizontal = true,
-                Channel = 0,
-                Hz = -1,
-                Duration = 1000,
-                Width = 1,
-                Distance = 1,
-                Pitch = 0,
-                Yaw = 0
-            };
-            TransitionIn = new NotificationStyleConfigTransition
-            {
-                Scale = 1,
-                Opacity = 0,
-                Vertical = 0,
-                Horizontal = 0,
-                Distance = 0,
-                Spin = 0,
-                Tween = NotificationTween.Linear,
-                Duration = 100
-            };
-            TransitionOut = new NotificationStyleConfigTransition
-            {
-                Scale = 1,
-                Opacity = 0,
-                Vertical = 0,
-                Horizontal = 0,
-                Distance = 0,
-                Spin = 0,
-                Tween = NotificationTween.Linear,
-                Duration = 100
-            };
+            Properties = new NotificationStyleConfigProperties();
         }
 
         public NotificationStyleConfig Clone()
@@ -54,38 +20,22 @@ namespace Discord2OpenVRPipe
             {
                 Properties = new NotificationStyleConfigProperties
                 {
-                    Channel = this.Properties.Channel,
-                    Distance = this.Properties.Distance,
-                    Duration = this.Properties.Duration,
-                    Headset = this.Properties.Headset,
-                    Horizontal = this.Properties.Horizontal,
-                    Hz = this.Properties.Hz,
-                    Level = this.Properties.Level,
-                    Pitch = this.Properties.Pitch,
-                    Width = this.Properties.Width,
-                    Yaw = this.Properties.Yaw
-                },
-                TransitionIn = new NotificationStyleConfigTransition
-                {
-                    Distance = this.TransitionIn.Distance,
-                    Duration = this.TransitionIn.Duration,
-                    Horizontal = this.TransitionIn.Horizontal,
-                    Opacity = this.TransitionIn.Opacity,
-                    Scale = this.TransitionIn.Scale,
-                    Spin = this.TransitionIn.Spin,
-                    Tween = this.TransitionIn.Tween,
-                    Vertical = this.TransitionIn.Vertical
-                },
-                TransitionOut = new NotificationStyleConfigTransition
-                {
-                    Distance = this.TransitionOut.Distance,
-                    Duration = this.TransitionOut.Duration,
-                    Horizontal = this.TransitionOut.Horizontal,
-                    Opacity = this.TransitionOut.Opacity,
-                    Scale = this.TransitionOut.Scale,
-                    Spin = this.TransitionOut.Spin,
-                    Tween = this.TransitionOut.Tween,
-                    Vertical = this.TransitionOut.Vertical
+                    Enabled = this.Properties.Enabled,
+                    Transitions = this.Properties.Transitions,
+                    AnchorType = this.Properties.AnchorType,
+                    AnimationHz = this.Properties.AnimationHz,
+                    DistanceX =  this.Properties.DistanceX,
+                    DistanceY =  this.Properties.DistanceY,
+                    DistanceZ =  this.Properties.DistanceZ,
+                    DurationMs =  this.Properties.DurationMs,
+                    OverlayChannel =  this.Properties.OverlayChannel,
+                    PitchDeg = this.Properties.PitchDeg,
+                    RollDeg = this.Properties.RollDeg,
+                    WidthM = this.Properties.WidthM,
+                    YawDeg = this.Properties.YawDeg,
+                    AlignToHorizon = this.Properties.AlignToHorizon,
+                    AttachToAnchor = this.Properties.AttachToAnchor,
+                    AttachToHorizon = this.Properties.AttachToHorizon,
                 }
             };
         }
@@ -94,47 +44,70 @@ namespace Discord2OpenVRPipe
     [Serializable]
     public class NotificationStyleConfigProperties
     {
-        [JsonProperty(PropertyName = "headset")]
-        public bool Headset { get; set; }
-        [JsonProperty(PropertyName = "horizontal")]
-        public bool Horizontal { get; set; }
-        [JsonProperty(PropertyName = "level")]
-        public bool Level { get; set; }
-        [JsonProperty(PropertyName = "channel")]
-        public int Channel { get; set; }
-        [JsonProperty(PropertyName = "hz")]
-        public int Hz { get; set; }
-        [JsonProperty(PropertyName = "duration")]
-        public int Duration { get; set; }
-        [JsonProperty(PropertyName = "width")]
-        public double Width { get; set; }
-        [JsonProperty(PropertyName = "distance")]
-        public double Distance { get; set; }
-        [JsonProperty(PropertyName = "pitch")]
-        public double Pitch { get; set; }
-        [JsonProperty(PropertyName = "yaw")]
-        public double Yaw { get; set; }
+        [JsonProperty(PropertyName = "enabled")]
+        public bool Enabled { get; set; } = true;
+        [JsonProperty(PropertyName = "anchorType")]
+        public NotificationAnchorType AnchorType { get; set; } = NotificationAnchorType.Head;
+        [JsonProperty(PropertyName = "attachToAnchor")]
+        public bool AttachToAnchor { get; set; } = false;
+        [JsonProperty(PropertyName = "attachToHorizon")]
+        public bool AttachToHorizon { get; set; } = false;
+        [JsonProperty(PropertyName = "alignToHorizon")]
+        public bool AlignToHorizon { get; set; } = false;
+        [JsonProperty(PropertyName = "overlayChannel")]
+        public int OverlayChannel { get; set; } = 0;
+        [JsonProperty(PropertyName = "animationHz")]
+        public int AnimationHz { get; set; } = -1;
+        [JsonProperty(PropertyName = "durationMs")]
+        public int DurationMs { get; set; } = 5000;
+        [JsonProperty(PropertyName = "widthM")]
+        public double WidthM { get; set; } = 1;
+        [JsonProperty(PropertyName = "zDistanceM")]
+        public double DistanceZ { get; set; } = 1;
+        [JsonProperty(PropertyName = "yDistanceM")]
+        public double DistanceY { get; set; } = 0;
+        [JsonProperty(PropertyName = "xDistanceM")]
+        public double DistanceX { get; set; } = 0;
+        [JsonProperty(PropertyName = "yawDeg")]
+        public double YawDeg { get; set; } = 0;
+        [JsonProperty(PropertyName = "pitchDeg")]
+        public double PitchDeg { get; set; } = 0;
+        [JsonProperty(PropertyName = "rollDeg")]
+        public double RollDeg { get; set; } = 0;
+        [JsonProperty(PropertyName = "transitions")]
+        public NotificationStyleConfigTransition[] Transitions { get; set; } = new NotificationStyleConfigTransition[2]
+        {
+            new NotificationStyleConfigTransition(),
+            new NotificationStyleConfigTransition()
+        };
     }
 
     [Serializable]
     public class NotificationStyleConfigTransition
     {
-        [JsonProperty(PropertyName = "scale")]
-        public double Scale { get; set; }
-        [JsonProperty(PropertyName = "opacity")]
-        public double Opacity { get; set; }
-        [JsonProperty(PropertyName = "vertical")]
-        public double Vertical { get; set; }
-        [JsonProperty(PropertyName = "horizontal")]
-        public double Horizontal { get; set; }
-        [JsonProperty(PropertyName = "distance")]
-        public double Distance { get; set; }
-        [JsonProperty(PropertyName = "spin")]
-        public double Spin { get; set; }
-        [JsonProperty(PropertyName = "tween")]
-        public NotificationTween Tween { get; set; }
-        [JsonProperty(PropertyName = "duration")]
-        public int Duration { get; set; }
+        [JsonProperty(PropertyName = "scalePer")]
+        public double Scale { get; set; } = 1;
+
+        [JsonProperty(PropertyName = "opacityPer")]
+        public double Opacity { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "yDistanceM")]
+        public double Vertical { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "zDistanceM")]
+        public double Horizontal { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "xDistanceM")]
+        public double Distance { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "rollDeg")]
+        public double Spin { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "tweenType")]
+        public NotificationTween Tween { get; set; } = NotificationTween.Linear;
+
+        [JsonProperty(PropertyName = "durationMs")]
+        public int Duration { get; set; } = 250;
     }
     
     [Serializable]
@@ -150,6 +123,15 @@ namespace Discord2OpenVRPipe
         Back,
         Elastic,
         Bounce
+    }
+
+    [Serializable]
+    public enum NotificationAnchorType
+    {
+        World,
+        Head,
+        LeftHand,
+        RightHand,
     }
 
     public static class NotificationExtensions
@@ -172,29 +154,33 @@ namespace Discord2OpenVRPipe
             };
         }
 
+        public static string NotificationAnchorTypeTooltip(this NotificationAnchorType anchorType)
+        {
+            return anchorType switch
+            {
+                NotificationAnchorType.World => "The notification is anchored to the world origin",
+                NotificationAnchorType.Head => "The notification is anchored to the user's head",
+                NotificationAnchorType.LeftHand => "The notification is anchored to the user's left hand",
+                NotificationAnchorType.RightHand => "The notification is anchored to the user's right hand",
+                _ => throw new ArgumentOutOfRangeException(nameof(anchorType), anchorType, null)
+            };
+        }
+
         public static PipeNotification GetNotification(this NotificationStyleConfig style, string imageData)
         {
             return new PipeNotification
             {
-                Image = imageData,
+                ImageData = imageData,
                 Properties = style.Properties,
-                Transition = style.TransitionIn,
-                Transition2 = style.TransitionOut
             };
         }
     }
 
     public class PipeNotification
     {
-        [JsonProperty(PropertyName = "custom")]
-        public bool Custom = true;
-        [JsonProperty(PropertyName = "image")]
-        public string Image;
-        [JsonProperty(PropertyName = "properties")]
+        [JsonProperty(PropertyName = "imageData")]
+        public string ImageData;
+        [JsonProperty(PropertyName = "customProperties")]
         public NotificationStyleConfigProperties Properties;
-        [JsonProperty(PropertyName = "transition")]
-        public NotificationStyleConfigTransition Transition;
-        [JsonProperty(PropertyName = "transition2")]
-        public NotificationStyleConfigTransition Transition2;
     }
 }

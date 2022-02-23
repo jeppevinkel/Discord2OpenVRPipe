@@ -10,8 +10,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Discord;
 using Discord.WebSocket;
+using Discord2OpenVRPipe.Properties;
 using Newtonsoft.Json;
 using nQuant;
 using Valve.VR;
@@ -34,9 +36,11 @@ namespace Discord2OpenVRPipe
         private bool _shouldShutDown = false;
         private DiscordSocketClient _discordClient;
         private WebsocketClient _notificationPipe;
+        private MainWindow _mainWindow;
 
-        public AppController(Action<bool> openvrStatusAction, Action<bool> discordStatusAction, Action<string> discordReadyAction, Action<bool> notificationPipeAction)
+        public AppController(MainWindow mainWindow, Action<bool> openvrStatusAction, Action<bool> discordStatusAction, Action<string> discordReadyAction, Action<bool> notificationPipeAction)
         {
+            _mainWindow = mainWindow;
             _openvrStatusAction += openvrStatusAction;
             _discordStatusAction += discordStatusAction;
             _discordReadyAction += discordReadyAction;
@@ -76,6 +80,8 @@ namespace Discord2OpenVRPipe
             
             var json = JsonConvert.SerializeObject(notificationStyle.GetNotification(imgData));
             
+            Debug.WriteLine(json);
+            
             _notificationPipe.Send(json);
         }
         
@@ -85,6 +91,8 @@ namespace Discord2OpenVRPipe
             PushPipe(imgData, notificationStyleConfig);
         }
 
+        DateTimeOffset cooldownExpiry = DateTimeOffset.UtcNow;
+        
         private async void DiscordMain()
         {
             Thread.CurrentThread.IsBackground = true;
@@ -123,12 +131,95 @@ namespace Discord2OpenVRPipe
                 return Task.CompletedTask;
             };
 
-            DateTimeOffset cooldownExpiry = DateTimeOffset.UtcNow;
-
             _discordClient.MessageReceived += message =>
             {
-                if (message.Author.IsBot || message.Channel.Id != Properties.Settings.Default.DiscordChannelId ||
-                    !(message.Channel is SocketTextChannel channel) || channel.Guild.Id != Properties.Settings.Default.DiscordServerId || !message.Attachments.Any(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg"))) return Task.CompletedTask;
+                if (message.Author.IsBot ||
+                    !(message.Channel is SocketTextChannel channel) || channel.Guild.Id != Properties.Settings.Default.DiscordServerId)
+                {
+                    return Task.CompletedTask;
+                }
+                
+                if (message.Channel.Id == Properties.Settings.Default.DiscordCommandChannelId && message.Content.StartsWith(Properties.Settings.Default.CommandPrefix) && message.Author is SocketGuildUser member)
+                {
+                    if (member.Roles.All(r => r.Id != Settings.Default.DiscordModeratorRoleId))
+                    {
+                        channel.SendMessageAsync("Fuck off you moderator wannabe!");
+                        return Task.CompletedTask;
+                    }
+                    
+                    var command =
+                        DiscordCommand.Parse(
+                            message.Content.Remove(0, Properties.Settings.Default.CommandPrefix.Length));
+
+                    switch (command.Command)
+                    {
+                        case "ping":
+                        {
+                            message.Channel.SendMessageAsync($"Pong! {string.Join(" ", command.Args)}");
+                        } break;
+                        case "cooldown":
+                        {
+                            var act = new Action<DiscordCommand>(command =>
+                            {
+                                if (command.Args.Length != 1)
+                                {
+                                    message.Channel.SendMessageAsync(
+                                        "You have to supply either off or the length of the cooldown in minutes.");
+                                    return;
+                                }
+
+                                if (command.Args[0] == "off")
+                                {
+                                    _mainWindow.CooldownEnabled = false;
+                                    message.Channel.SendMessageAsync(
+                                        $"The cooldown has been disabled.");
+                                    return;
+                                } else if (command.Args[0] == "on")
+                                {
+                                    _mainWindow.CooldownEnabled = true;
+                                    message.Channel.SendMessageAsync(
+                                        $"The cooldown has been enabled.");
+                                    return;
+                                }
+                                else if (double.TryParse(command.Args[0], out var newCooldown))
+                                {
+                                    var max = _mainWindow.Cooldown.Maximum;
+                                    var min = _mainWindow.Cooldown.Minimum;
+
+                                    if (newCooldown > max || newCooldown < min)
+                                    {
+                                        message.Channel.SendMessageAsync(
+                                            $"The cooldown has to be more than {min} minutes and less than {max} minutes.");
+                                        return;
+                                    }
+
+                                    _mainWindow.CooldownEnabled = true;
+                                    _mainWindow.SetCooldown(newCooldown);
+
+                                    message.Channel.SendMessageAsync(
+                                        $"The cooldown has been set to {command.Args[0]} minutes.");
+                                    return;
+                                }
+                                else
+                                {
+                                    message.Channel.SendMessageAsync(
+                                        "The supplied value is invalid. It must be either `off` or a number.");
+                                    return;
+                                }
+                            });
+                            _mainWindow.Dispatcher.Invoke(act, command);
+                        } break;
+                    }
+                    
+                    return Task.CompletedTask;
+                }
+
+                if (message.Channel.Id != Properties.Settings.Default.DiscordChannelId)
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (!message.Attachments.Any(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg"))) return Task.CompletedTask;
 
                 if (Properties.Settings.Default.CooldownEnabled && cooldownExpiry > DateTimeOffset.UtcNow)
                 {
@@ -225,6 +316,7 @@ namespace Discord2OpenVRPipe
         {
             var vrInitComplete = false;
             var pipeInitComplete = false;
+            DateTimeOffset lastStatusUpdate = DateTimeOffset.UtcNow;
 
             Thread.CurrentThread.IsBackground = true;
             while (true)
@@ -265,6 +357,9 @@ namespace Discord2OpenVRPipe
                         _notificationPipe =
                             new WebsocketClient(url);
 
+                        _notificationPipe.IsReconnectionEnabled = true;
+                        _notificationPipe.ReconnectTimeout = TimeSpan.FromSeconds(5);
+
                         _notificationPipe.ReconnectionHappened.Subscribe(info =>
                         {
                             _notificationPipeAction.Invoke(true);
@@ -286,6 +381,10 @@ namespace Discord2OpenVRPipe
                         _notificationPipe.Start();
                         pipeInitComplete = true;
                     }
+                    else
+                    {
+                        
+                    }
                 }
 
                 if (_shouldShutDown)
@@ -297,6 +396,22 @@ namespace Discord2OpenVRPipe
                     Thread.Sleep(500);
                     _vr.Shutdown();
                     _openvrStatusAction.Invoke(false);
+                }
+
+                if (_discordConnected && Settings.Default.CooldownEnabled && (DateTimeOffset.UtcNow.Subtract(lastStatusUpdate) > TimeSpan.FromSeconds(10)) && (cooldownExpiry > DateTimeOffset.UtcNow))
+                {
+                    var str = $"Cooldown: {(cooldownExpiry - DateTimeOffset.UtcNow).ToString("mm\\:ss")}";
+                    Debug.WriteLine(str);
+                    _discordClient.SetActivityAsync(new StreamingGame(
+                        str,
+                        "https://twitch.tv/c0ldvengeance"));
+                    
+                    lastStatusUpdate = DateTimeOffset.UtcNow;
+                } else if (_discordConnected && Settings.Default.CooldownEnabled && (DateTimeOffset.UtcNow.Subtract(lastStatusUpdate) > TimeSpan.FromSeconds(10)) && _discordClient.Activity is not null)
+                {
+                    _discordClient.SetActivityAsync(null);
+                    
+                    lastStatusUpdate = DateTimeOffset.UtcNow;
                 }
             }
         }
@@ -341,6 +456,24 @@ namespace Discord2OpenVRPipe
         public void Shutdown()
         {
             _shouldShutDown = true;
+        }
+    }
+
+    public class DiscordCommand
+    {
+        public string Command { get; set; }
+        public string[] Args { get; set; }
+
+        public DiscordCommand(string command, IEnumerable<string> args)
+        {
+            Command = command;
+            Args = args.ToArray();
+        }
+
+        public static DiscordCommand Parse(string command)
+        {
+            var strings = command.Split(' ');
+            return new DiscordCommand(strings.First(), strings.Skip(1));
         }
     }
 }

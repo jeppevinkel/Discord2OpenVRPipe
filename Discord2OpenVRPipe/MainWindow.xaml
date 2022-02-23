@@ -7,8 +7,9 @@
         xmlns:controls="clr-namespace:Discord2OpenVRPipe.CustomControls"
         mc:Ignorable="d"
         MinWidth="650"
+        MinHeight="410"
         StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged"
-        Title="MainWindow" Height="385" Width="650">
+        Title="MainWindow" Height="410" Width="650">
     <StackPanel Orientation="Vertical" Margin="10">
         <GroupBox Header="Status &amp; Help" Background="WhiteSmoke">
             <StackPanel Orientation="Vertical">
@@ -37,7 +38,8 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <CheckBox x:Name="checkBox_MinimizeOnLaunch" Content="Launch minimized " Checked="CheckBox_MinimizeOnLaunch_Checked" Unchecked="CheckBox_MinimizeOnLaunch_Checked"/>
-                    <CheckBox x:Name="checkBox_MinimizeToTray" Content="Minimize to tray, " Checked="CheckBox_MinimizeToTray_Checked" Unchecked="CheckBox_MinimizeToTray_Checked"/>
+                    <CheckBox x:Name="checkBox_MinimizeToTray" Content="Minimize to tray " Checked="CheckBox_MinimizeToTray_Checked" Unchecked="CheckBox_MinimizeToTray_Checked"/>
+                    <CheckBox x:Name="checkBox_ExitWithSteam" Content="Exit with Steam " Checked="CheckBox_ExitWithSteam_Checked" Unchecked="CheckBox_ExitWithSteam_Checked"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
                     <Label Content="Pipe port:"/>
@@ -60,8 +62,12 @@
                 <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
                     <Label Content="Cooldown:"/>
                     <controls:NumberUpDown x:Name="Cooldown" Increment="0.5" Minimum="0" Maximum="99999" Width="48"/>
-                    <CheckBox x:Name="CooldownEnabled" Checked="CheckBox_CooldownEnabled" Unchecked="CheckBox_CooldownEnabled" VerticalAlignment="Center" Margin="10 0 0 0"
+                    <CheckBox x:Name="CooldownEnabledCheckBox" Checked="CheckBox_CooldownEnabled" Unchecked="CheckBox_CooldownEnabled" VerticalAlignment="Center" Margin="10 0 0 0"
                               Content="Enabled"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Command Prefix:"/>
+                    <TextBox x:Name="textBoxCommandPrefix" TextWrapping="Wrap" Width="40" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </StackPanel>
         </GroupBox>

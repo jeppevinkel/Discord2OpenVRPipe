@@ -17,10 +17,26 @@
         <GroupBox Header="Properties" Background="WhiteSmoke">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="5">
-                    <CheckBox x:Name="CheckBoxFixedToHeadset" Content="Fixed to headset" Margin="0 0 5 0" />
-                    <CheckBox x:Name="CheckBoxAlignHorizontal" Content="Horizontal alignment" Margin="0 0 5 0" />
-                    <CheckBox x:Name="CheckBoxLevel" Content="Level" ToolTip="Will ignore pitch of the headset and keep origin level" />
+                    <CheckBox x:Name="CheckBoxAttachToAnchor" Content="Attach to anchor" ToolTip="Will fix the overlay to the anchor, overrides attachToHorizon and alignToHorizon" Margin="0 0 5 0" />
+                    <CheckBox x:Name="CheckBoxAlignHorizontal" Content="Align to horizon" ToolTip="Initial roll alignment to the horizon, else relative to anchor" Margin="0 0 5 0" />
+                    <CheckBox x:Name="CheckBoxAttachToHorizon" Content="Attach to horizon" ToolTip="Will ignore pitch of the headset and keep origin level" />
                 </StackPanel>
+                <DockPanel Margin="5">
+                    <Label Content="AnchorType:" Margin="0 0 5 0"/>
+                    <ComboBox x:Name="AnchorTypeSelect"
+                              SelectedValuePath="AnchorTypeValue"
+                              SelectionChanged="AnchorTypeSelect_OnSelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" Width="Auto">
+                                    <TextBlock.ToolTip>
+                                        <ToolTip Content="{Binding Tooltip}"></ToolTip>
+                                    </TextBlock.ToolTip>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Channel:" Margin="0 0 5 0"/>
                     <controls:IntegerUpDown x:Name="PropertiesChannel" Minimum="0" Maximum="64" Value="0" />
@@ -56,27 +72,27 @@
             <StackPanel Orientation="Vertical">
                 <DockPanel Margin="5" ToolTip="Normalized scale, 1 = 100%">
                     <Label Content="Scale:" Margin="0 0 28 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInScale" Minimum="0.001" Maximum="1000" Value="1" />
+                    <controls:NumberUpDown x:Name="TransitionInScale" Minimum="0.001" Maximum="1000" Value="1" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Normalized opacity where 1 = 100%">
                     <Label Content="Opacity:" Margin="0 0 14 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInOpacity" Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInOpacity" Minimum="0" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Vertical translation, in meters">
                     <Label Content="Vertical:" Margin="0 0 16 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInVertical" Minimum="-1000" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInVertical" Minimum="-1000" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Horizontal translation, in meters">
                     <Label Content="Horizontal:" Margin="0 0 0 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInHorizontal" Minimum="-1000" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInHorizontal" Minimum="-1000" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Distance from headset, in meters">
                     <Label Content="Distance:" Margin="0 0 10 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInDistance" Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInDistance" Minimum="0" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Roll rotation, left(-) or right (+) in degrees">
                     <Label Content="Spin:" Margin="0 0 32 0"/>
-                    <controls:NumberUpDown x:Name="TransitionInSpin" Minimum="-360" Maximum="360" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionInSpin" Minimum="-360" Maximum="360" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Tween:" Margin="0 0 21 0"/>
@@ -104,27 +120,27 @@
             <StackPanel Orientation="Vertical">
                 <DockPanel Margin="5" ToolTip="Normalized scale, 1 = 100%">
                     <Label Content="Scale:" Margin="0 0 28 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutScale" Minimum="0.001" Maximum="1000" Value="1" />
+                    <controls:NumberUpDown x:Name="TransitionOutScale" Minimum="0.001" Maximum="1000" Value="1" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Normalized opacity where 1 = 100%">
                     <Label Content="Opacity:" Margin="0 0 14 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutOpacity" Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutOpacity" Minimum="0" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Vertical translation, in meters">
                     <Label Content="Vertical:" Margin="0 0 16 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutVertical" Minimum="-1000" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutVertical" Minimum="-1000" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Horizontal translation, in meters">
                     <Label Content="Horizontal:" Margin="0 0 0 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutHorizontal" Minimum="-1000" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutHorizontal" Minimum="-1000" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Distance from headset, in meters">
                     <Label Content="Distance:" Margin="0 0 10 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutDistance" Minimum="0" Maximum="1000" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutDistance" Minimum="0" Maximum="1000" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5" ToolTip="Roll rotation, left(-) or right (+) in degrees">
                     <Label Content="Spin:" Margin="0 0 32 0"/>
-                    <controls:NumberUpDown x:Name="TransitionOutSpin" Minimum="-360" Maximum="360" Value="0" />
+                    <controls:NumberUpDown x:Name="TransitionOutSpin" Minimum="-360" Maximum="360" Value="0" Increment="0.1" />
                 </DockPanel>
                 <DockPanel Margin="5">
                     <Label Content="Tween:" Margin="0 0 21 0"/>

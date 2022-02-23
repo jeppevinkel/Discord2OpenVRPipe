@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -25,8 +26,42 @@ namespace Discord2OpenVRPipe
             get => Properties.Settings.Default.CooldownMinutes;
             set
             {
-                Properties.Settings.Default.CooldownMinutes = value;
-                Properties.Settings.Default.Save();
+                if (Dispatcher.CheckAccess())
+                {
+                    Settings.Default.CooldownMinutes = value;
+                    Cooldown.SetValue(value);
+                }
+                else
+                {
+                    var act = new Action<double>(cooldown =>
+                    {
+                        Settings.Default.CooldownMinutes = cooldown;
+                        Cooldown.SetValue(cooldown);
+                    });
+                    Dispatcher.Invoke(act, args: value);
+                }
+            }
+        }
+
+        public bool CooldownEnabled
+        {
+            get => Settings.Default.CooldownEnabled;
+            set
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    Settings.Default.CooldownEnabled = value;
+                    CooldownEnabledCheckBox.IsChecked = value;
+                }
+                else
+                {
+                    var act = new Action<bool>(cooldownEnabled =>
+                    {
+                        Settings.Default.CooldownEnabled = cooldownEnabled;
+                        CooldownEnabledCheckBox.IsChecked = cooldownEnabled;
+                    });
+                    Dispatcher.Invoke(act, args: value);
+                }
             }
         }
 
@@ -49,7 +84,7 @@ namespace Discord2OpenVRPipe
             
             Label_Version.Content = Properties.Resources.Version;
 
-            _controller = new AppController(status =>
+            _controller = new AppController(this,  status =>
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -62,6 +97,13 @@ namespace Discord2OpenVRPipe
                     {
                         Label_OpenVRStatus.Background = Brushes.Tomato;
                         Label_OpenVRStatus.Text = "Disconnected";
+
+                        if (_settings.ExitWithSteam)
+                        {
+                            _controller.Shutdown();
+                            _notifyIcon?.Dispose();
+                            System.Windows.Application.Current.Shutdown();
+                        }
                         
                     }
                 });
@@ -152,10 +194,16 @@ namespace Discord2OpenVRPipe
 
             Cooldown.IsEnabled = Settings.Default.CooldownEnabled;
             Cooldown.Value = Settings.Default.CooldownMinutes;
-            CooldownEnabled.IsChecked = Settings.Default.CooldownEnabled;
+            CooldownEnabledCheckBox.IsChecked = Settings.Default.CooldownEnabled;
             Cooldown.ValueChanged += (sender, args) =>
             {
                 Settings.Default.CooldownMinutes = args.NewValue;
+            };
+
+            textBoxCommandPrefix.Text = Settings.Default.CommandPrefix;
+            textBoxCommandPrefix.TextChanged += (sender, args) =>
+            {
+                Settings.Default.CommandPrefix = textBoxCommandPrefix.Text;
             };
             
             if (_settings.LaunchMinimized)
@@ -167,6 +215,26 @@ namespace Discord2OpenVRPipe
                     _notifyIcon.ShowBalloonTip(2000);
                 }
                 WindowState = WindowState.Minimized;
+            }
+        }
+
+        public void SetCooldown(double value)
+        {
+            if (Dispatcher.CheckAccess())
+            {
+                Cooldown.SetValue(value);
+                // Cooldown.Value = value;
+                Settings.Default.CooldownMinutes = value;
+            }
+            else
+            {
+                var act = new Action<double>(_value =>
+                {
+                    Cooldown.SetValue(_value);
+                    // Cooldown.Value = _value;
+                    Settings.Default.CooldownMinutes = _value;
+                });
+                Dispatcher.Invoke(act, value);
             }
         }
         
@@ -210,6 +278,7 @@ namespace Discord2OpenVRPipe
         private void NotifyIconClick(object sender, EventArgs e)
         {
             Show();
+            Activate();
             WindowState = _storedWindowState;
         }
 
@@ -227,6 +296,7 @@ namespace Discord2OpenVRPipe
             
             checkBox_MinimizeOnLaunch.IsChecked = _settings.LaunchMinimized;
             checkBox_MinimizeToTray.IsChecked = _settings.MinimizeToTray;
+            checkBox_ExitWithSteam.IsChecked = _settings.ExitWithSteam;
             textBoxPort.Text = _settings.PipePort.ToString();
             textBoxToken.Text = _settings.BotToken;
         }
@@ -277,6 +347,12 @@ namespace Discord2OpenVRPipe
             _settings.Save();
         }
 
+        private void CheckBox_ExitWithSteam_Checked(object sender, RoutedEventArgs e)
+        {
+            _settings.ExitWithSteam = CheckboxValue(e);
+            _settings.Save();
+        }
+
         private void ButtonBotReconnectClick(object sender, RoutedEventArgs e)
         {
             _controller.ReconnectDiscord();
@@ -288,8 +364,10 @@ namespace Discord2OpenVRPipe
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
-                Properties.Settings.Default.DiscordServerId = dialog.SelectedGuild.Id;
-                Properties.Settings.Default.DiscordChannelId = dialog.SelectedChannel.Id;
+                Settings.Default.DiscordServerId = dialog.SelectedGuild.Id;
+                Settings.Default.DiscordChannelId = dialog.SelectedChannel.Id;
+                Settings.Default.DiscordCommandChannelId = dialog.SelectedCommandChannel.Id;
+                Settings.Default.DiscordModeratorRoleId = dialog.SelectedModeratorRole.Id;
                 textBoxChannel.Text = dialog.SelectedChannel.Name;
             }
         }

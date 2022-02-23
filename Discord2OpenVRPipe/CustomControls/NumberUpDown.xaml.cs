@@ -98,6 +98,15 @@ namespace Discord2OpenVRPipe.CustomControls
             args.RoutedEvent = NumberUpDown.ValueChangedEvent;
             this.RaiseEvent(args);
         }
+
+        public void SetValue(double value)
+        {
+            value = Math.Min(this.Maximum, value);
+            value = Math.Max(this.Minimum, value);
+            
+            this.Value = value;
+            this.PART_NumericTextBox.Text = value.ToString(this.valueFormat);
+        }
         
         public NumberUpDown()
         {

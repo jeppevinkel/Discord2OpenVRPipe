@@ -55,6 +55,24 @@ namespace Discord2OpenVRPipe.Properties
             set { this[nameof(DiscordChannelId)] = value; }
         }
         
+        [UserScopedSetting]
+        [DefaultSettingValueAttribute(
+            @"")]
+        public ulong DiscordCommandChannelId
+        {
+            get { return (ulong) this[nameof(DiscordCommandChannelId)]; }
+            set { this[nameof(DiscordCommandChannelId)] = value; }
+        }
+        
+        [UserScopedSetting]
+        [DefaultSettingValueAttribute(
+            @"")]
+        public ulong DiscordModeratorRoleId
+        {
+            get { return (ulong) this[nameof(DiscordModeratorRoleId)]; }
+            set { this[nameof(DiscordModeratorRoleId)] = value; }
+        }
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -76,6 +94,18 @@ namespace Discord2OpenVRPipe.Properties
             }
             set {
                 this[nameof(MinimizeToTray)] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ExitWithSteam {
+            get {
+                return ((bool)(this[nameof(ExitWithSteam)]));
+            }
+            set {
+                this[nameof(ExitWithSteam)] = value;
             }
         }
 
@@ -136,6 +166,18 @@ namespace Discord2OpenVRPipe.Properties
             }
             set {
                 this[nameof(CooldownEnabled)] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("!")]
+        public string CommandPrefix {
+            get {
+                return ((string)(this[nameof(CommandPrefix)]));
+            }
+            set {
+                this[nameof(CommandPrefix)] = value;
             }
         }
     }

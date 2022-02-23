@@ -205,7 +205,7 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include="app.vrmanifest">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="icon.ico">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
