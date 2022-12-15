@@ -4,72 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Discord2OpenVRPipe"
-        xmlns:controls="clr-namespace:Discord2OpenVRPipe.CustomControls"
         mc:Ignorable="d"
-        MinWidth="650"
-        MinHeight="410"
-        StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged"
-        Title="MainWindow" Height="410" Width="650">
-    <StackPanel Orientation="Vertical" Margin="10">
-        <GroupBox Header="Status &amp; Help" Background="WhiteSmoke">
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal" Margin="5">
-                    <Label Content="OpenVR status:"/>
-                    <TextBlock x:Name="Label_OpenVRStatus" Text="Status" Foreground="White" Background="Gray" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5">
-                    <Label Content="VR Pipe status:"/>
-                    <TextBlock x:Name="Label_PipeStatus" Text="Status" Foreground="White" Background="Gray" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5">
-                    <Label Content="Discord status:"/>
-                    <TextBlock x:Name="Label_DiscordStatus" Text="Status" Foreground="White" Background="Gray" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </StackPanel>
-                
-                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                    <TextBlock x:Name="textBlock_Twitter" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0 0 10 0">
-                        <Hyperlink NavigateUri="https://twitter.com/JeppeVinkel" Click="ClickedURL">Contact</Hyperlink>
-                    </TextBlock>
-                    <Label x:Name="Label_Version" Content="version" Padding="0"/>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
-        <GroupBox Header="Settings" Background="AliceBlue">
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal" Margin="5">
-                    <CheckBox x:Name="checkBox_MinimizeOnLaunch" Content="Launch minimized " Checked="CheckBox_MinimizeOnLaunch_Checked" Unchecked="CheckBox_MinimizeOnLaunch_Checked"/>
-                    <CheckBox x:Name="checkBox_MinimizeToTray" Content="Minimize to tray " Checked="CheckBox_MinimizeToTray_Checked" Unchecked="CheckBox_MinimizeToTray_Checked"/>
-                    <CheckBox x:Name="checkBox_ExitWithSteam" Content="Exit with Steam " Checked="CheckBox_ExitWithSteam_Checked" Unchecked="CheckBox_ExitWithSteam_Checked"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                    <Label Content="Pipe port:"/>
-                    <TextBox x:Name="textBoxPort" TextWrapping="Wrap" Text="TextBox" IsEnabled="False" VerticalContentAlignment="Center"/>
-                    <Button x:Name="buttonPortEdit" Content="Edit" Click="ButtonPortEditClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                    <Button x:Name="buttonStyleEdit" Content="Edit Notification Style" Click="ButtonStyleEditClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                    <Button x:Name="buttonStyleTest" Content="Test" Click="ButtonStyleTestClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                    <Label Content="Bot Token:"/>
-                    <TextBox x:Name="textBoxToken" TextWrapping="Wrap" Text="TextBox" IsEnabled="False" VerticalContentAlignment="Center"/>
-                    <Button x:Name="buttonTokenEdit" Content="Edit" Click="ButtonTokenEditClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                    <Button x:Name="buttonBotReconnect" Content="Reconnect" Click="ButtonBotReconnectClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                    <Label Content="Discord Channel:"/>
-                    <TextBox x:Name="textBoxChannel" TextWrapping="Wrap" Text="TextBox" IsEnabled="False" VerticalContentAlignment="Center"/>
-                    <Button x:Name="buttonChannelEdit" Content="Edit" Click="ButtonChannelEditClick" Margin="5 0 0 0" Padding="10 0 10 0"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5 0 5 5">
-                    <Label Content="Cooldown:"/>
-                    <controls:NumberUpDown x:Name="Cooldown" Increment="0.5" Minimum="0" Maximum="99999" Width="48"/>
-                    <CheckBox x:Name="CooldownEnabledCheckBox" Checked="CheckBox_CooldownEnabled" Unchecked="CheckBox_CooldownEnabled" VerticalAlignment="Center" Margin="10 0 0 0"
-                              Content="Enabled"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Command Prefix:"/>
-                    <TextBox x:Name="textBoxCommandPrefix" TextWrapping="Wrap" Width="40" VerticalContentAlignment="Center"/>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+        Title="Discord2OpenVRPipe" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Column="0">
+            
+        </StackPanel>
+        
+        <Grid Grid.Column="1"></Grid>
+    </Grid>
 </Window>
