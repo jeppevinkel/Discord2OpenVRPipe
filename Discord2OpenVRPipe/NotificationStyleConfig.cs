@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Media;
 using Newtonsoft.Json;
 
 namespace Discord2OpenVRPipe
@@ -80,6 +82,33 @@ namespace Discord2OpenVRPipe
             new NotificationStyleConfigTransition(),
             new NotificationStyleConfigTransition()
         };
+        [JsonProperty(PropertyName = "textAreas")]
+        public List<NotificationStyleConfigTextArea> TextAreas { get; set; } = new();
+    }
+
+    [Serializable]
+    public class NotificationStyleConfigTextArea
+    {
+        [JsonProperty(PropertyName = "text")]
+        public string Text { get; set; }
+        [JsonProperty(PropertyName = "xPositionPx")]
+        public int XPositionPx { get; set; } = 0;
+        [JsonProperty(PropertyName = "yPositionPx")]
+        public int YPositionPx { get; set; } = 0;
+        [JsonProperty(PropertyName = "widthPx")]
+        public int WidthPx { get; set; } = 0;
+        [JsonProperty(PropertyName = "heightPx")]
+        public int HeightPx { get; set; } = 0;
+        [JsonProperty(PropertyName = "fontSizePt")]
+        public int FontSizePt { get; set; } = 10;
+        [JsonProperty(PropertyName = "fontFamily")]
+        public string FontFamily { get; set; } = "Arial";
+        [JsonProperty(PropertyName = "fontColor")]
+        public string FontColor { get; set; } = "#004080";
+        [JsonProperty(PropertyName = "horizontalAlignment")]
+        public NotificationHorizontalAlignment HorizontalAlignment { get; set; } = NotificationHorizontalAlignment.Near;
+        [JsonProperty(PropertyName = "verticalAlignment")]
+        public NotificationVerticalAlignment VerticalAlignment { get; set; } = NotificationVerticalAlignment.Near;
     }
 
     [Serializable]
@@ -133,6 +162,22 @@ namespace Discord2OpenVRPipe
         LeftHand,
         RightHand,
     }
+    
+    [Serializable]
+    public enum NotificationHorizontalAlignment
+    {
+        Near,
+        Center,
+        Far,
+    }
+    
+    [Serializable]
+    public enum NotificationVerticalAlignment
+    {
+        Near,
+        Center,
+        Far,
+    }
 
     public static class NotificationExtensions
     {
@@ -173,6 +218,36 @@ namespace Discord2OpenVRPipe
                 ImageData = imageData,
                 Properties = style.Properties,
             };
+        }
+
+        public static PipeNotification WriteText(this PipeNotification notification, string text, Rect textArea,
+            string fontFamily = "Arial", int fontSizePt = 10, string fontColor = "#ffffff",
+            NotificationHorizontalAlignment horizontalAlignment = NotificationHorizontalAlignment.Near,
+            NotificationVerticalAlignment verticalAlignment = NotificationVerticalAlignment.Near) 
+        {
+            notification.Properties.TextAreas.Add(new NotificationStyleConfigTextArea()
+            {
+                Text = text,
+                WidthPx = (int)textArea.Width,
+                HeightPx = (int)textArea.Height,
+                FontFamily = fontFamily,
+                FontSizePt = fontSizePt,
+                FontColor = fontColor,
+                HorizontalAlignment = horizontalAlignment,
+                VerticalAlignment = verticalAlignment,
+                XPositionPx = (int)textArea.X,
+                YPositionPx = (int)textArea.Y,
+            });
+            return notification;
+        }
+
+        public static PipeNotification WriteText(this PipeNotification notification, string text, Rect textArea,
+            string fontFamily = "Arial", int fontSizePt = 10, Color fontColor = new Color(),
+            NotificationHorizontalAlignment horizontalAlignment = NotificationHorizontalAlignment.Near,
+            NotificationVerticalAlignment verticalAlignment = NotificationVerticalAlignment.Near)
+        {
+            return notification.WriteText(text, textArea, fontFamily, fontSizePt, fontColor.ToString(),
+                horizontalAlignment, verticalAlignment);
         }
     }
 

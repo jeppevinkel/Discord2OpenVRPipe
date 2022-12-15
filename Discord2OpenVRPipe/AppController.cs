@@ -2,23 +2,27 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Discord;
 using Discord.WebSocket;
 using Discord2OpenVRPipe.Properties;
+using ImageMagick;
 using Newtonsoft.Json;
 using nQuant;
 using Valve.VR;
 using Websocket.Client;
 using Color = System.Drawing.Color;
+using Image = System.Drawing.Image;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Discord2OpenVRPipe
@@ -79,7 +83,21 @@ namespace Discord2OpenVRPipe
             var notificationStyle = notificationStyleConfig ?? Properties.Settings.Default.NotificationStyle;
             
             var json = JsonConvert.SerializeObject(notificationStyle.GetNotification(imgData));
+
+            Debug.WriteLine(json);
             
+            _notificationPipe.Send(json);
+        }
+        
+        public void PushPipe(string imgData, string watermark, Rect textArea, NotificationStyleConfig notificationStyleConfig = null)
+        {
+            var notificationStyle = notificationStyleConfig ?? Properties.Settings.Default.NotificationStyle;
+            
+            var savedCol = Properties.Settings.Default.WatermarkColor;
+
+            var json = JsonConvert.SerializeObject(notificationStyle.GetNotification(imgData).WriteText(
+                watermark, textArea, "Verdana", 21, savedCol, NotificationHorizontalAlignment.Near, NotificationVerticalAlignment.Far));
+
             Debug.WriteLine(json);
             
             _notificationPipe.Send(json);
@@ -96,11 +114,15 @@ namespace Discord2OpenVRPipe
         private async void DiscordMain()
         {
             Thread.CurrentThread.IsBackground = true;
-            
-            _discordClient = new DiscordSocketClient();
+
+            var config = new DiscordSocketConfig()
+            {
+                GatewayIntents = GatewayIntents.MessageContent | GatewayIntents.GuildMessages | GatewayIntents.Guilds,
+            };
+            _discordClient = new DiscordSocketClient(config);
             _discordClient.Log += message =>
             {
-                Debug.WriteLine(message.ToString());
+                Debug.WriteLine($"[Discord] {message.ToString()}");
                 return Task.CompletedTask;
             };
 
@@ -219,7 +241,7 @@ namespace Discord2OpenVRPipe
                     return Task.CompletedTask;
                 }
 
-                if (!message.Attachments.Any(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg"))) return Task.CompletedTask;
+                if (!message.Attachments.Any(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg") || a.Filename.EndsWith(".jpeg") || a.Filename.EndsWith(".gif"))) return Task.CompletedTask;
 
                 if (Properties.Settings.Default.CooldownEnabled && cooldownExpiry > DateTimeOffset.UtcNow)
                 {
@@ -228,33 +250,57 @@ namespace Discord2OpenVRPipe
                     return Task.CompletedTask;
                 }
                 
-                foreach (Attachment attachment in message.Attachments.Where(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg") || a.Filename.EndsWith(".jpeg")))
+                foreach (Attachment attachment in message.Attachments.Where(a => a.Filename.EndsWith(".png") || a.Filename.EndsWith(".jpg") || a.Filename.EndsWith(".jpeg") || a.Filename.EndsWith(".gif")))
                 {
-                    var img = GetImageAsBitmapUrl(attachment.Url).Result;
-
-                    var scale = Math.Min(1280f / img.Width, (720f / img.Height));
-                    var newWidth = (int) (img.Width * scale);
-                    var newHeight = (int) (img.Height * scale);
-
-                    var resized = ResizeBitmap(img, newWidth, newHeight);
-
-                    if (Properties.Settings.Default.WatermarkImages)
-                        WatermarkBitmap(resized, message.Author.Username);
+                    using var image = new MagickImage(attachment.Url);
                     
-                    using var ms = new MemoryStream();
-                    var quantizer = new WuQuantizer();
-                    using (var quantized = quantizer.QuantizeImage(resized, 10, 70))
+                    var scale = Math.Min(1280f / image.Width, (720f / image.Height));
+                    var newWidth = (int) (image.Width * scale);
+                    var newHeight = (int) (image.Height * scale);
+                    
+                    var isGif = image.Format == MagickFormat.Gif;
+                    if (isGif)
                     {
-                        quantized.Save(ms, ImageFormat.Png);
+                        using var col = new MagickImageCollection(attachment.Url);
+                        col.Coalesce();
+
+                        scale = Math.Min(1280f / image.Width, (720f / image.Height));
+                        newWidth = (int) (image.Width * scale);
+                        newHeight = (int) (image.Height * scale);
+                        
+                        foreach (var frame in col)
+                        {
+                            if (newWidth < frame.Width || newHeight < frame.Height)
+                            {
+                                frame.Resize(newWidth, newHeight);
+                            }
+                            
+                            // WatermarkImage(frame, message.Author.Username);
+                            
+                            var settings = new QuantizeSettings();
+                            settings.Colors = 256;
+                            frame.Quantize(settings);
+                        }
+                        
+                        col.Optimize();
+                        var gif = col.ToBase64(MagickFormat.Gif);
+                        PushPipe(gif, message.Author.Username, new Rect(5, image.Height - 5 - 42, image.Width-5, 42));
+                        Debug.WriteLine(gif.Length);
+                        Debug.WriteLine($"{newWidth}/{newHeight}");
+                        break;
+                        
+                        continue;
                     }
 
-                    
-                    // resized.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                    var sigBase64 = Convert.ToBase64String(ms.GetBuffer());
-                    Debug.WriteLine(sigBase64);
+                    image.Resize(newWidth, newHeight);
 
+                    if (Properties.Settings.Default.WatermarkImages)
+                        WatermarkImage(image, message.Author.Username);
+                        
+                    image.Quantize(new QuantizeSettings());
+                    
                     message.Channel.SendMessageAsync($"I have piped {attachment.Filename} to VR.");
-                    PushPipe(sigBase64);
+                    PushPipe(image.ToBase64());
                     
                     cooldownExpiry = DateTimeOffset.UtcNow.AddMinutes(Properties.Settings.Default.CooldownMinutes);
                 }
@@ -276,9 +322,50 @@ namespace Discord2OpenVRPipe
 
             return bmp;
         }
+
+        public void WatermarkImage(IMagickImage<byte> image, string watermark)
+        {
+            var savedCol = Properties.Settings.Default.WatermarkColor;
+            new Drawables()
+                .FontPointSize(21)
+                .Font("Verdana")
+                .FillColor(new MagickColor(savedCol.R, savedCol.G, savedCol.B, savedCol.A))
+                .Text(5, image.Height - 5, watermark)
+                .Draw(image);
+        }
         
         public Bitmap ResizeBitmap(Bitmap bmp, int width, int height)
         {
+            // var resized = new Bitmap(width, height);
+            // using (var graphics = Graphics.FromImage(resized))
+            // {
+            //     graphics.CompositingQuality = CompositingQuality.HighSpeed;
+            //     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            //     graphics.CompositingMode = CompositingMode.SourceCopy;
+            //     graphics.DrawImage(bmp, 0, 0, width, height);
+            // }
+            //
+            // return resized;
+            
+            var isGif = bmp.RawFormat.Equals(ImageFormat.Gif);
+
+            if (isGif)
+            {
+                // var collection = new MagickImageCollection(bmp.);
+                Image res = new Bitmap(width, height);
+                var frameDimensions = bmp.FrameDimensionsList;
+                for (int frameNumber = 0; frameNumber < frameDimensions.Length; frameNumber++)
+                {
+                    bmp.SelectActiveFrame(new FrameDimension(frameDimensions[frameNumber]), frameNumber);
+                    Image frame = new Bitmap(width, height);
+                    using (Graphics g = Graphics.FromImage(frame))
+                    {
+                        g.DrawImage(bmp, 0, 0, width, height);
+                    }
+                    // res.frame
+                }
+            }
+            
             Bitmap result = new Bitmap(width, height);
             using (Graphics g = Graphics.FromImage(result))
             {
@@ -358,24 +445,25 @@ namespace Discord2OpenVRPipe
                             new WebsocketClient(url);
 
                         _notificationPipe.IsReconnectionEnabled = true;
-                        _notificationPipe.ReconnectTimeout = TimeSpan.FromSeconds(5);
+                        // _notificationPipe.ReconnectTimeout = TimeSpan.FromSeconds(5);
 
                         _notificationPipe.ReconnectionHappened.Subscribe(info =>
                         {
                             _notificationPipeAction.Invoke(true);
                             _notificationPipeConnected = true;
+                            Debug.WriteLine($"[Pipe RC] {info.Type}, {info.ToString()}");
                         });
 
                         _notificationPipe.DisconnectionHappened.Subscribe(info =>
                         {
                             _notificationPipeAction.Invoke(false);
                             _notificationPipeConnected = false;
-                            Debug.WriteLine($"[Pipe] {info.Type}, {info.CloseStatusDescription}");
+                            Debug.WriteLine($"[Pipe DC] {info.Type}, {info.CloseStatusDescription}");
                         });
 
                         _notificationPipe.MessageReceived.Subscribe(msg =>
                         {
-                            Debug.WriteLine($"[Pipe] {msg}");
+                            Debug.WriteLine($"[Pipe] RECV: {msg}");
                         });
 
                         _notificationPipe.Start();

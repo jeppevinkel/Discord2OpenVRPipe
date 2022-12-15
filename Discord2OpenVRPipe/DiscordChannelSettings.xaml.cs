@@ -74,7 +74,7 @@ namespace Discord2OpenVRPipe
         
         private void OkButtonClick(object sender, RoutedEventArgs e)
         {
-            if (SelectedChannel is null || SelectedGuild is null || SelectedCommandChannel is null || SelectedModeratorRole is null)
+            if (SelectedChannel is null && SelectedGuild is null && SelectedCommandChannel is null && SelectedModeratorRole is null)
             {
                 DialogResult = false;
             }

@@ -364,11 +364,11 @@ namespace Discord2OpenVRPipe
             dialog.ShowDialog();
             if (dialog.DialogResult == true)
             {
-                Settings.Default.DiscordServerId = dialog.SelectedGuild.Id;
-                Settings.Default.DiscordChannelId = dialog.SelectedChannel.Id;
-                Settings.Default.DiscordCommandChannelId = dialog.SelectedCommandChannel.Id;
-                Settings.Default.DiscordModeratorRoleId = dialog.SelectedModeratorRole.Id;
-                textBoxChannel.Text = dialog.SelectedChannel.Name;
+                Settings.Default.DiscordServerId = dialog.SelectedGuild?.Id ?? 0;
+                Settings.Default.DiscordChannelId = dialog.SelectedChannel?.Id ?? 0;
+                Settings.Default.DiscordCommandChannelId = dialog.SelectedCommandChannel?.Id ?? 0;
+                Settings.Default.DiscordModeratorRoleId = dialog.SelectedModeratorRole?.Id ?? 0;
+                textBoxChannel.Text = dialog.SelectedChannel?.Name ?? "None Selected";
             }
         }
 
