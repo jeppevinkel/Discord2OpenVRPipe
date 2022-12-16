@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="Discord2OpenVRPipe.CustomControls.NumberUpDown"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Discord2OpenVRPipe.CustomControls"
+             mc:Ignorable="d"
+             d:DesignHeight="25" d:DesignWidth="100">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <TextBox x:Name="PART_NumericTextBox" Grid.Column="0" BorderBrush="Black" Margin="0,0,0.2,0"
+                     VerticalContentAlignment="Center" />
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <RepeatButton x:Name="PART_IncreaseButton" Grid.Row="0" Margin="0,0,0,0.1"
+                          BorderBrush="Black" BorderThickness="0.75" Width="13"
+                          Foreground="Black" Background="#cecece">
+                <RepeatButton.Content>
+                    <Polygon StrokeThickness="0.5" Stroke="Transparent"
+                             Points="0,0 -2,5 2,5" Stretch="Fill"
+                             Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                AncestorType=RepeatButton}, Path=Foreground}" />
+                </RepeatButton.Content>
+            </RepeatButton>
+            <RepeatButton x:Name="PART_DecreaseButton" Grid.Row="1" Margin="0,0.1,0,0" Width="13"
+                          BorderBrush="Black" BorderThickness="0.75"
+                          Foreground="Black" Background="#cecece">
+                <RepeatButton.Content>
+                    <Polygon StrokeThickness="0.5" Stroke="Transparent"
+                             Points="-2,0 2,0 0,5 " Stretch="Fill"
+                             Fill="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                            AncestorType=RepeatButton}, Path=Foreground}" />
+                </RepeatButton.Content>
+            </RepeatButton>
+        </Grid>
+    </Grid>
+</UserControl>

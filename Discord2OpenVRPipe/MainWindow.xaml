@@ -4,18 +4,63 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Discord2OpenVRPipe"
+        xmlns:views="clr-namespace:Discord2OpenVRPipe.Views"
+        xmlns:vms="clr-namespace:Discord2OpenVRPipe.ViewModels"
         mc:Ignorable="d"
+        FontSize="14"
         Title="Discord2OpenVRPipe" Height="450" Width="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
         
-        <StackPanel Grid.Column="0">
+            <!-- <Border Grid.Column="0" BorderThickness="0 0 2 0" BorderBrush="Black"> -->
+                <StackPanel Grid.Column="0" Background="WhiteSmoke">
+                    <Button Content="General" Command="{Binding GeneralSettingsCommand}"/>
+                    <Button Content="Discord" Command="{Binding DiscordConfigCommand}"/>
+                    <Button Content="Pipe" Command="{Binding PipeConfigCommand}"/>
+                </StackPanel>
+            <!-- </Border> -->
+        
+            <Grid Grid.Column="1" Margin="5">
+                <Grid.Resources>
+                    <DataTemplate DataType="{x:Type vms:DiscordConfigViewModel}">
+                        <views:DiscordConfigView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vms:GeneralSettingsViewModel}">
+                        <views:GeneralSettingsView/>
+                    </DataTemplate>
+                </Grid.Resources>
             
-        </StackPanel>
+                <ContentControl Content="{Binding CurrentViewModel}"/>
+            </Grid>
+        </Grid>
         
-        <Grid Grid.Column="1"></Grid>
+        <Grid Grid.Row="1" Background="WhiteSmoke">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <!-- <Border BorderThickness="0 2 0 0" BorderBrush="Black"> -->
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Version:"/>
+                    <Label Content="{Binding VersionString}"/>
+                </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0 0 5 0">
+                <TextBlock VerticalAlignment="Center">
+                    <Hyperlink CommandParameter="{Binding NewVersionUrl}"
+                               Command="{Binding HyperlinkCommand}">
+                        <TextBlock Text="{Binding NewVersionString}"/>
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+            <!-- </Border> -->
+        </Grid>
     </Grid>
 </Window>
