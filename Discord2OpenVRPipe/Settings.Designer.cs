@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.Windows.Media;
+using Discord2OpenVRPipe.Models;
+using Discord2OpenVRPipe.Repositories;
 
 namespace Discord2OpenVRPipe
 {
@@ -80,6 +82,15 @@ namespace Discord2OpenVRPipe
         {
             get { return (ulong) this[nameof(DiscordModeratorRoleId)]; }
             set { this[nameof(DiscordModeratorRoleId)] = value; }
+        }
+        
+        [UserScopedSetting]
+        [DefaultSettingValueAttribute(
+            @"")]
+        public DiscordRole[] WhitelistedRoles
+        {
+            get { return (DiscordRole[]) this[nameof(WhitelistedRoles)]; }
+            set { this[nameof(WhitelistedRoles)] = value; }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
@@ -178,6 +189,18 @@ namespace Discord2OpenVRPipe
             }
         }
         
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool WhitelistEnabled {
+            get {
+                return ((bool)(this[nameof(WhitelistEnabled)]));
+            }
+            set {
+                this[nameof(WhitelistEnabled)] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("!")]

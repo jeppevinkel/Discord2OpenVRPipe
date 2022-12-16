@@ -64,8 +64,6 @@ namespace Discord2OpenVRPipe.CustomControls
             set { this.SetValue(IncrementProperty, value); }
         }
         
-        // public static readonly DependencyProperty ValueProperty =
-        //     DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumberUpDown), new PropertyMetadata(0.0, OnValueChanged));
         public static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumberUpDown), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnValueChanged));
         private static void OnValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -78,7 +76,6 @@ namespace Discord2OpenVRPipe.CustomControls
             get { return (double)this.GetValue(ValueProperty); }
             set
             {
-                Debug.WriteLine(value);
                 SetValue(ValueProperty, value);
             }
         }

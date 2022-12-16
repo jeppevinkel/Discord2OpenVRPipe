@@ -1,8 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Input;
 using Discord2OpenVRPipe.Commands;
 using Discord2OpenVRPipe.Models;
+using Discord2OpenVRPipe.Repositories;
 
 namespace Discord2OpenVRPipe.ViewModels;
 
@@ -11,13 +16,12 @@ public class DiscordConfigViewModel : ViewModelBase
     private readonly DiscordConfig _discordConfig;
     private readonly Settings _settings = Settings.Default;
     
-    private string? _botToken;
     public string? BotToken
     {
-        get => _botToken;
+        get => _settings.BotToken;
         set
         {
-            _botToken = value;
+            _settings.BotToken = value;
             OnPropertyChanged();
         }
     }
@@ -33,19 +37,18 @@ public class DiscordConfigViewModel : ViewModelBase
         }
     }
 
-    private bool _whitelistEnabled = false;
     public bool WhitelistEnabled
     {
-        get => _whitelistEnabled;
+        get => _settings.WhitelistEnabled;
         set
         {
-            _whitelistEnabled = value;
+            _settings.WhitelistEnabled = value;
             OnPropertyChanged();
         }
     }
 
-    private DiscordRole _whitelistEnabledSelected;
-    public DiscordRole WhitelistEnabledSelected
+    private DiscordRole? _whitelistEnabledSelected;
+    public DiscordRole? WhitelistEnabledSelected
     {
         get => _whitelistEnabledSelected;
         set
@@ -55,8 +58,8 @@ public class DiscordConfigViewModel : ViewModelBase
         }
     }
 
-    private DiscordRole _whitelistAvailableSelected;
-    public DiscordRole WhitelistAvailableSelected
+    private DiscordRole? _whitelistAvailableSelected;
+    public DiscordRole? WhitelistAvailableSelected
     {
         get => _whitelistAvailableSelected;
         set
@@ -88,7 +91,9 @@ public class DiscordConfigViewModel : ViewModelBase
 
     public ObservableCollection<DiscordRole> WhitelistedRoles { get; } = new();
 
-    public ObservableCollection<DiscordRole> WhitelistRolesAvailable { get; } = new();
+    public List<DiscordRole> WhitelistRolesAvailable => DiscordRoles.Except(WhitelistedRoles).ToList();
+
+    // public ObservableCollection<DiscordRole> DiscordModeratorRoles => _settings.DiscordModeratorRoles;
 
     public ObservableCollection<DiscordRole> DiscordServers { get; } = new();
 
@@ -107,13 +112,30 @@ public class DiscordConfigViewModel : ViewModelBase
         
         ConnectCommand = new DiscordConnectCommand(this);
         DisconnectCommand = new DiscordDisconnectCommand(this);
-        AddToWhitelistCommand = new SwapCollectionCommand<DiscordRole>(WhitelistRolesAvailable, WhitelistedRoles);
-        RemoveFromWhitelistCommand = new SwapCollectionCommand<DiscordRole>(WhitelistedRoles, WhitelistRolesAvailable);
+        AddToWhitelistCommand = new AddCollectionCommand<DiscordRole>(WhitelistedRoles);
+        RemoveFromWhitelistCommand = new RemoveCollectionCommand<DiscordRole>(WhitelistedRoles);
 
-        WhitelistedRoles.Add(new DiscordRole("Moderators", 0));
-        WhitelistedRoles.Add(new DiscordRole("Cool kids", 1));
 
-        WhitelistRolesAvailable.Add(new DiscordRole("Normies", 2));
-        WhitelistRolesAvailable.Add(new DiscordRole("Baddies", 3));
+        WhitelistedRoles.CollectionChanged += (sender, args) =>
+        {
+            _settings.WhitelistedRoles = WhitelistedRoles.ToArray();
+            OnPropertyChanged(nameof(WhitelistRolesAvailable));
+        };
+        DiscordRoles.CollectionChanged += (sender, args) =>
+        {
+            OnPropertyChanged(nameof(WhitelistRolesAvailable));
+        };
+        
+        foreach (var discordRole in _settings.WhitelistedRoles)
+        {
+            WhitelistedRoles.Add(discordRole);
+        }
+        
+        DiscordRoles.Add(new DiscordRole("Moderators", 0));
+        DiscordRoles.Add(new DiscordRole("Cool kids", 1));
+
+        DiscordRoles.Add(new DiscordRole("Normies", 2));
+        DiscordRoles.Add(new DiscordRole("Baddies", 3));
+        DiscordRoles.Add(new DiscordRole("Lollers", 54));
     }
 }

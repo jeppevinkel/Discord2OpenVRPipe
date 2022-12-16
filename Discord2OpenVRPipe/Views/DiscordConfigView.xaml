@@ -28,7 +28,8 @@
                 </Grid.ColumnDefinitions>
                 <Label Content="Bot Token:"/>
                 <TextBox Grid.Column="1" VerticalAlignment="Center"
-                         Text="{Binding BotToken, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding BotToken, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsConnected, Converter={StaticResource BooleanToReverseConverter}}"/>
                 <Button Grid.Column="2" Margin="5 0 0 0"
                         Content="Connect"
                         Command="{Binding ConnectCommand}"/>

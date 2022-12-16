@@ -1,13 +1,16 @@
-﻿namespace Discord2OpenVRPipe.Models;
+﻿using System;
 
-public class DiscordRole
+namespace Discord2OpenVRPipe.Models;
+
+[Serializable]
+public struct DiscordRole
 {
-    public string Name { get; }
-    public long Id { get; }
-
     public DiscordRole(string name, long id)
     {
-        Name = name;
+        Name = name ?? throw new ArgumentNullException(nameof(name));
         Id = id;
     }
+
+    public string Name { get; set; }
+    public long Id { get; set; }
 }
